@@ -14,15 +14,13 @@ $str_doc2 = array("CS.8", "CS.9", "IC.3", "IC.4", "IS.3", "IS.4", "S.5", "S.6");
 $str_doc3 = array("CS.6", "CS.7", "IC.1", "IC.2", "IS.1", "IS.2", "S.1", "S.2");
 $str_doc4 = array("CS.2", "CS.3", "IC.5", "IC.6", "IS.5", "IS.6", "S.3", "S.4");
 
-//$group1 = "6SAC08 2SAC01 2SAC09 2SAC11 2SAC02 2SAC06 2SAC05 2SAC04 2SAC03 2SAC12 2SAC07 2SAC08 2SAC10 2SAC13 2SAC14 2SAC15 3SAC03 1SAC10";
-//$group2 = "5SAC02 8SAC11 5SAC01 TA01-001 8SAC09 TA01-003 8CPA01-002 8BTCA01-002 8CPA01-001 8BTCA01-001";
-//$group3 = "9SA01 999-13 999-07 999-08 TATA-004";
-//$group4 = "TATA-003 SAC08 10SAC12";
-
-$str_group1 = array("6SAC08","2SAC01","2SAC09","2SAC11","2SAC02","2SAC06","2SAC05","2SAC04","2SAC03","2SAC12","2SAC07","2SAC08","2SAC10","2SAC13","2SAC14","2SAC15","3SAC03","1SAC10");
-$str_group2 = array("5SAC02","8SAC11","5SAC01","TA01-001","8SAC09","TA01-003","8CPA01-002","8BTCA01-002","8CPA01-001","8BTCA01-001");
-$str_group3 = array("9SA01","999-13","999-07","999-08","TATA-004");
-$str_group4 = array("TATA-003","SAC08","10SAC12");
+$str_group1 = array("101-AP01","101-AT01","101-BKT01","101-BS01","101-BS02","101-BS03","101-BS04","101-BS05","101-BS06","101-DS01","101-DS02","101-DS03","101-FS01","101-FS02","101-FS03","101-FS04","101-LLIT01","101-ML01","101-O01","101-RS01"
+,"101-SIM01","101-T%01","101-TR01","101-VR01","102-CAV01","102-CBG01","102-CBS01","102-CDS01","102-CKL01","102-CKS01","102-CML01","102-CMT01","102-CO01","102-T%01","103-LBS01","103-LDS01","103-LKS01","103-LML01","103-LMT01"
+,"103-LO01","103-T%01","201-AP01","201-AT01","201-BF01","201-BS01","201-CT01","201-DL01","201-DS01","201-DT01","201-FK01","201-FS01","201-FT01","201-GY01","201-HK01","201-KENDA","201-LEAO01","201-LLIT01","201-ML01",
+    "201-MS01","201-MX01","201-NT01","201-O01","201-SIM01","201-T%01","201-T01","201-TOYO01","201-VR01","201-YK01");
+$str_group2 = array("402-J02","401-J01","401-KV01","401-WIL01","401-WIL02","401-WIL-03","601-1","601-2","602-1","602-2","602-3-ALL01","603-1","610-1","610-2","610-3","9-9402-ALL02");
+$str_group3 = array("999-01","999-02","999-03","999-04","999-05","999-06","999-07","999-08","999-09","999-10","999-11","999-12","999-13","999-14","999-15","999-16","999-17","999-18","999-19","999-20","999-21","999-22","999-23","SY02-00140");
+$str_group4 = array("999-26","999-28","A502-ALL03");
 
 echo "Today is " . date("Y/m/d");
 echo "\n\r" . date("Y/m/d", strtotime("yesterday"));
@@ -86,24 +84,6 @@ while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
 
 
     $p_group = "";
-
-    /*
-        if (strpos($group1, $ICCAT_CODE) !== false) {
-            $p_group = "P1";
-        }
-
-        if (strpos($group2, $ICCAT_CODE) !== false) {
-            $p_group = "P2";
-        }
-
-        if (strpos($group3, $ICCAT_CODE) !== false) {
-            $p_group = "P3";
-        }
-
-        if (strpos($group4, $ICCAT_CODE) !== false) {
-            $p_group = "P4";
-        }
-    */
 
     if (in_array($ICCAT_CODE, $str_group1)) {
         $p_group = "P1";

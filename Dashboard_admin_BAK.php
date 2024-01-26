@@ -8,7 +8,6 @@ if (strlen($_SESSION['alogin']) == "") {
     require_once 'vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php';
     $detect = new Mobile_Detect;
 
-/*
     $sql_curr_month = " SELECT * FROM ims_month where month = '" . date("n") . "'";
     $stmt_curr_month = $conn->prepare($sql_curr_month);
     $stmt_curr_month->execute();
@@ -19,7 +18,6 @@ if (strlen($_SESSION['alogin']) == "") {
 
     $sale_point = 15000000;
     $sale_point_text = '10,500,000 บาท';
-*/
 
     ?>
 
@@ -39,8 +37,7 @@ if (strlen($_SESSION['alogin']) == "") {
         }
     </style>
 
-    <!--body id="page-top" onload="showGraph_Cockpit_Daily();showGraph_Cockpit_Monthly();showGraph_Tires_Brand();"-->
-    <body id="page-top" onload="">
+    <body id="page-top" onload="showGraph_Cockpit_Daily();showGraph_Cockpit_Monthly();showGraph_Tires_Brand();">
     <div id="wrapper">
         <?php
         include('includes/Side-Bar.php');
@@ -51,7 +48,153 @@ if (strlen($_SESSION['alogin']) == "") {
                 <?php
                 include('includes/Top-Bar.php');
                 ?>
+                <div class="container-fluid" id="container-wrapper">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    สถิติ ยอดขายรายวัน SAC วันที่
+                                    <?php echo date("d/m/Y"); ?>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">ปี <?php echo date("Y"); ?></h5>
+                                    <canvas id="myChartDaily" width="200" height="200"></canvas>
+                                </div>
+                                <div class="card-body">
+                                    <table id="example" class="display table table-striped table-bordered"
+                                           cellspacing="0" width="100%">
+                                        <thead>
+                                        <tr>
+                                            <th>Sale</th>
+                                            <th>ยอดขาย</th>
+                                        </tr>
+                                        </thead>
+                                        <tfoot>
+                                        <tr>
+                                            <th>Sale</th>
+                                            <th>ยอดขาย</th>
+                                        </tr>
+                                        </tfoot>
+                                        <tbody>
+                                        <?php
+                                        $date = date("d/m/Y");
+                                        $total = 0;
+                                        $sql_daily = "SELECT SLMN_NAME,sum(CAST(TRD_G_KEYIN AS DECIMAL(10,2))) as  TRD_G_KEYIN
+                                                      FROM ims_product_sale_sac 
+                                                      WHERE DI_DATE = '" . $date . "'
+                                                      GROUP BY  SLMN_NAME
+                                                      ORDER BY SLMN_NAME";
 
+                                        //$myfile = fopen("qry_file_mysql.txt", "w") or die("Unable to open file!");
+                                        //fwrite($myfile, $sql_daily);
+                                        //fclose($myfile);
+
+                                        $statement_daily = $conn->query($sql_daily);
+                                        $results_daily = $statement_daily->fetchAll(PDO::FETCH_ASSOC);
+
+                                        foreach ($results_daily
+
+                                        as $row_daily) { ?>
+
+                                        <tr>
+                                            <td><?php echo htmlentities($row_daily['SLMN_NAME']); ?></td>
+                                            <td>
+                                                <p class="number"><?php echo htmlentities(number_format($row_daily['TRD_G_KEYIN'], 2)); ?></p>
+                                            </td>
+                                            <?php $total = $total + $row_daily['TRD_G_KEYIN']; ?>
+                                            <?php } ?>
+
+                                        </tbody>
+                                        <?php echo "ยอดขายรวม วันที่ " . $date . " = " . number_format($total, 2) . " บาท " ?>
+                                    </table>
+                                </div>
+
+                                <div class="card-header">
+                                    สถิติ ยอดขายรายวัน เดือน
+                                    <?php echo $month_name . " " . date("Y"); ?>
+                                    เป้าหมายยอดขาย = <?php echo $sale_point_text ?>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">ปี <?php echo date("Y"); ?></h5>
+                                    <canvas id="myChartMonthly" width="200" height="200"></canvas>
+                                </div>
+                                <div class="card-body">
+                                    <table id="example" class="display table table-striped table-bordered"
+                                           cellspacing="0" width="100%">
+                                        <thead>
+                                        <tr>
+                                            <th>Sale</th>
+                                            <th>ยอดขาย</th>
+                                        </tr>
+                                        </thead>
+                                        <tfoot>
+                                        <tr>
+                                            <th>Sale</th>
+                                            <th>ยอดขาย</th>
+                                        </tr>
+                                        </tfoot>
+                                        <tbody>
+                                        <?php
+                                        $date = date("d/m/Y");
+                                        $total = 0;
+                                        $sql_daily = "SELECT SLMN_NAME,sum(CAST(TRD_G_KEYIN AS DECIMAL(10,2))) as  TRD_G_KEYIN
+                                                      FROM ims_product_sale_sac 
+                                                      WHERE DI_MONTH = '" . date("n") . "'
+                                                      AND DI_YEAR = '" . date("Y") . "'
+                                                      GROUP BY  SLMN_NAME
+                                                      ORDER BY SLMN_NAME";
+
+                                        $statement_daily = $conn->query($sql_daily);
+                                        $results_daily = $statement_daily->fetchAll(PDO::FETCH_ASSOC);
+
+                                        foreach ($results_daily
+
+                                        as $row_daily) { ?>
+
+                                        <tr>
+                                            <td><?php echo htmlentities($row_daily['SLMN_NAME']); ?></td>
+                                            <td>
+                                                <?php $precent_sale = ($row_daily['TRD_G_KEYIN'] / $sale_point) * 100;
+                                                $total_remain = $sale_point - $row_daily['TRD_G_KEYIN'];
+                                                $precent_total_remain = ($total_remain / $sale_point) * 100;
+                                                $data = "style='width: " . $precent_sale . "%'";
+                                                ?>
+                                                <p class="number"><?php echo htmlentities(number_format($row_daily['TRD_G_KEYIN'], 2)); ?></p>
+
+                                                <div class="progress">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                         role="progressbar" <?php echo $data ?>
+                                                         aria-valuenow="<?php echo $precent_sale ?>" aria-valuemin="0"
+                                                         aria-valuemax="100"><?php echo htmlentities(number_format($precent_sale, 2)) . "%" ?>
+                                                    </div>
+                                                </div>
+
+                                                <p class="number">
+                                                    คิดเป็น <?php echo htmlentities(number_format($precent_sale, 2)) . " % จากเป้ายอดขาย"; ?></p>
+
+                                                <p class="number">
+                                                    เป้ายอดขายที่ต้องทำเพิ่ม
+                                                    คือ <?php echo htmlentities(number_format($total_remain, 2))
+                                                        . " หรือ " . htmlentities(number_format($precent_total_remain, 2)) . " %"; ?> </p>
+
+                                            </td>
+                                            <?php $total = $total + $row_daily['TRD_G_KEYIN']; ?>
+                                            <?php } ?>
+
+                                        </tbody>
+                                        <?php echo "ยอดขายรวม เดือน " . $month_name . " " . date("Y") . " = " . number_format($total, 2) . " บาท " ?>
+                                        เป้าหมายยอดขาย = <?php echo $sale_point_text ?>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <?php include('display_chart_tires_brand_admin.php'); ?>
+
+                    </div>
+
+                </div>
             </div>
         </div>
 
@@ -76,11 +219,11 @@ if (strlen($_SESSION['alogin']) == "") {
     <script src='vendor/calendar/main.js'></script>
     <script src='vendor/calendar/locales/th.js'></script>
 
-    <!--script>
+    <script>
         myVar = setInterval(function () {
             window.location.reload(true);
         }, 100000);
-    </script-->
+    </script>
 
     <script>
 
