@@ -155,7 +155,6 @@ $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND
 //fclose($my_file);
 
 
-
 $data = "วันที่,รายการ,จำนวน,ปียาง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
