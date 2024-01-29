@@ -140,7 +140,10 @@ WHERE
  SKUMASTER.SKU_SKUALT = SKUALT.SKUALT_KEY AND
  SKUMASTER.SKU_ICSIZE = ICSIZE.ICSIZE_KEY AND
  SKUMASTER.SKU_ICCOLOR = ICCOLOR.ICCOLOR_KEY AND TRH_BR=BR_KEY AND
- AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%') AND TRD_UTQNAME like 'เส้น' ";
+ AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%') AND (TRD_UTQNAME like 'เส้น' 
+ OR SKUMASTER.SKU_CODE IN ('A340-14-14','PWIL616-01','WIL616-24','WIL616-26','WIL830-01','WIL616-27','WIL516-09','WIL515-07',
+ 'PWIL8225-01','J048','PWIL820-01','PWIL616-02','PWIL516-01',
+'A340-16-15','PWIL10225-01','PWIL6175-01','PWIL615-01','PWIL1020-01','WIL516-12''PWIL616-05','A340-10-245','WIL824-02','PWIL616-03','WIL516-13')) ";
 
 
 $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' ";
@@ -153,7 +156,7 @@ $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND
 
 
 
-$data = "วันที่,ประเภท,รหัสสินค้า,รายละเอียดสินค้า,จำนวน,คลัง/ปี,LOCATION,เลขที่เอกสาร,คันที่,เทค,ชื่อลูกค้า,คงเหลือใน LO\n";
+$data = "วันที่,รายการ,จำนวน,ปียาง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
@@ -163,14 +166,11 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
     $doc_date = substr($row['DI_DATE'],8,2) . "/" . substr($row['DI_DATE'],5,2) . "/" . substr($row['DI_DATE'],0,4);
 
     $data .= " " . $doc_date . ",";
-    $data .= " ,";
     $data .= str_replace(",", "^", $row['SKU_CODE']) . ",";
-    $data .= str_replace(",", "^", $row['SKU_NAME']) . ",";
     $data .= str_replace(",", "^", $row['TRD_QTY']) . ",";
     $data .= str_replace(",", "^", $row['WL_CODE']) . ",";
     $data .= " ,";
     $data .= $row['DI_REF'] . ",";
-    $data .= " ,";
     $data .= str_replace(",", "^", $row['SLMN_NAME']) . ",";
     $data .= str_replace(",", "^", $row['AR_NAME']) . ",";
     $data .= " " . "\n";
