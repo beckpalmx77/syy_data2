@@ -30,8 +30,6 @@ echo " [x] Sent 'Send Data'\n\r";
 $channel->close();
 $connection->close();
 
-
-
 $current_date = date("Y-m-d");
 //$current_date = "2023-07-04";
 
