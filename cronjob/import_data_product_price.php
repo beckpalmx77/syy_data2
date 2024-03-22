@@ -8,10 +8,11 @@ include("../config/connect_db.php");
 include("../cond_file/query-product-price-main.php");
 
 $sql_sqlsvr = $select_query . $sql_cond . $sql_order;
-
-//$myfile = fopen("sqlqry_file1.txt", "w") or die("Unable to open file!");
-//fwrite($myfile, $sql_sqlsvr);
-//fclose($myfile);
+/*
+$myfile = fopen("sqlqry_file1.txt", "w") or die("Unable to open file!");
+fwrite($myfile, $sql_sqlsvr);
+fclose($myfile);
+*/
 
 $stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
 $stmt_sqlsvr->execute();
