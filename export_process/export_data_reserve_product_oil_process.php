@@ -13,7 +13,7 @@ include('../config/connect_sqlserver.php');
 $doc_date_start = substr($_POST['doc_date_start'], 6, 4) . "/" . substr($_POST['doc_date_start'], 3, 2) . "/" . substr($_POST['doc_date_start'], 0, 2);
 $doc_date_to = substr($_POST['doc_date_to'], 6, 4) . "/" . substr($_POST['doc_date_to'], 3, 2) . "/" . substr($_POST['doc_date_to'], 0, 2);
 
-$SKU_CODE = "'SNP-J7005W40-4L' ";
+$SKU_CODE = "('SNP-J7005W40-4L','SNP-J5005W30-4L','SNP-J50010W40-4L','SNP-T50010W30-6L','SNP-T50015W40-6L')";
 
 $sql_reserve = " SELECT
  DOCINFO.DI_REF,
@@ -141,7 +141,7 @@ WHERE
  SKUMASTER.SKU_ICSIZE = ICSIZE.ICSIZE_KEY AND
  SKUMASTER.SKU_ICCOLOR = ICCOLOR.ICCOLOR_KEY AND TRH_BR=BR_KEY AND
  AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%') AND  
- SKUMASTER.SKU_CODE IN ('SNP-J7005W40-4L','SNP-J5005W30-4L','SNP-J50010W40-4L','SNP-T50010W30-6L','SNP-T50015W40-6L') ";
+ SKUMASTER.SKU_CODE IN " . $SKU_CODE ;
 
 
 $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' ";
@@ -153,7 +153,7 @@ $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND
 //fclose($my_file);
 
 
-$data = "วันที่,รายการ,จำนวน,ปียาง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
+$data = "วันที่,รายการ,จำนวน,-,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
