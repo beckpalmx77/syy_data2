@@ -14,8 +14,13 @@ $doc_date_start = substr($_POST['doc_date_start'], 6, 4) . "/" . substr($_POST['
 $doc_date_to = substr($_POST['doc_date_to'], 6, 4) . "/" . substr($_POST['doc_date_to'], 3, 2) . "/" . substr($_POST['doc_date_to'], 0, 2);
 
 $SKU_CODE = "('SNP-J7005W40-4L','SNP-J5005W30-4L','SNP-J50010W40-4L','SNP-T50010W30-6L','SNP-T50015W40-6L')";
+//$ICCAT_CODE = '501-01';
 
-$ICCAT_CODE = '501-01';
+$ICCAT_CODE = $_POST["ICCAT_ID"];
+
+//$my_file = fopen("exp_qry_reserve_0.txt", "w") or die("Unable to open file!");
+//fwrite($my_file, $ICCAT_CODE);
+//fclose($my_file);
 
 $sql_reserve = " SELECT
  DOCINFO.DI_REF,
@@ -143,7 +148,7 @@ WHERE
  SKUMASTER.SKU_ICSIZE = ICSIZE.ICSIZE_KEY AND
  SKUMASTER.SKU_ICCOLOR = ICCOLOR.ICCOLOR_KEY AND TRH_BR=BR_KEY AND
  AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%') AND  
- ICCAT_CODE = IN " . $ICCAT_CODE ;
+ ICCAT_CODE LIKE '" . $ICCAT_CODE . "'";
 
 
 $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' ";
@@ -155,7 +160,7 @@ $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND
 //fclose($my_file);
 
 
-$data = "วันที่,รายการ,จำนวน,-,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
+$data = "วันที่,รายการ,จำนวน,ตำแหน่ง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();

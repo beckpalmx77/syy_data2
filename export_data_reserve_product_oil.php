@@ -84,8 +84,59 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                     </div>
                                                                 </div>
 
+                                                                <div class="modal-body">
+                                                                    <div class="form-group row">
 
-                                                             </div>
+                                                                        <div class="col-sm-3">
+                                                                            <label for="ICCAT_ID"
+                                                                                   class="control-label">รหัสหมวดหมู่สินค้า</label>
+                                                                            <input type="text" class="form-control"
+                                                                                   id="ICCAT_ID"
+                                                                                   name="ICCAT_ID"
+                                                                                   value="501-01"
+                                                                                   required="required"
+                                                                                   readonly="true"
+                                                                                   placeholder="รหัสหมวดหมู่สินค้า">
+                                                                        </div>
+
+                                                                        <div class="col-sm-3">
+                                                                            <label for="ICCAT_NAME"
+                                                                                   class="control-label">ชื่อหมวดหมู่สินค้า</label>
+                                                                            <input type="text" class="form-control"
+                                                                                   id="ICCAT_NAME"
+                                                                                   name="ICCAT_NAME"
+                                                                                   value="น้ำมันเครื่อง SINOPEC"
+                                                                                   required="required"
+                                                                                   readonly="true"
+                                                                                   placeholder="ชื่อหมวดหมู่สินค้า">
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                </div>
+
+                                                                <!--div class="modal-body">
+
+                                                                    <div class="modal-body">
+                                                                        <div class="form-group row">
+
+                                                                            <label for="ICCAT_ID">หมวดหมู่สินค้า
+                                                                                :</label>
+                                                                            <input type="hidden" name="ICCAT_ID"
+                                                                                   id="ICCAT_ID"
+                                                                                   class="form-control">
+                                                                            <select id='selICCAT'
+                                                                                    class='form-control'
+                                                                                    onchange="Onchange_ICCAT_id();">
+                                                                                <option value='0'>-
+                                                                                    ค้นหาหมวดหมู่สินค้า -
+                                                                                </option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div-->
+
+                                                            </div>
 
                                                             <div class="modal-footer">
                                                                 <input type="hidden" name="id" id="id"/>
@@ -153,7 +204,10 @@ if (strlen($_SESSION['alogin']) == "") {
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <!-- Select2 -->
-    <script src="vendor/select2/dist/js/select2.min.js"></script>
+    <link href='js/select2/dist/css/select2.min.css' rel='stylesheet' type='text/css'>
+
+    <!-- select2 script -->
+    <script src='js/select2/dist/js/select2.min.js'></script>
     <!-- Bootstrap Datepicker -->
     <script src="vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
     <!-- Bootstrap Touchspin -->
@@ -202,6 +256,39 @@ if (strlen($_SESSION['alogin']) == "") {
                 autoclose: true
             });
         });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#selICCAT").select2({
+                ajax: {
+                    url: "model/iccat_ajaxfile.php",
+                    type: "post",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            searchTerm: params.term // search term
+                        };
+                    },
+                    processResults: function (response) {
+                        return {
+                            results: response
+                        };
+                    },
+                    cache: true
+                }
+            });
+        });
+
+    </script>
+
+    <script>
+        function Onchange_ICCAT_id() {
+            let iccat_id = $('#selICCAT').val();
+            $('#ICCAT_ID').val(iccat_id);
+        }
     </script>
 
     </body>
