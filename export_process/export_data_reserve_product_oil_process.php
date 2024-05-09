@@ -22,6 +22,7 @@ $ICCAT_CODE = $_POST["ICCAT_ID"];
 //fwrite($my_file, $ICCAT_CODE);
 //fclose($my_file);
 
+$RESERVE_DOC = "BK02";
 $SKU_NAME = "น้ำมันเครื่อง";
 
 $sql_reserve = " SELECT
@@ -149,14 +150,13 @@ WHERE
  SKUMASTER.SKU_SKUALT = SKUALT.SKUALT_KEY AND
  SKUMASTER.SKU_ICSIZE = ICSIZE.ICSIZE_KEY AND
  SKUMASTER.SKU_ICCOLOR = ICCOLOR.ICCOLOR_KEY AND TRH_BR=BR_KEY AND
- AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND 
- (DI_REF LIKE 'BK02%') AND  
- SKU_NAME LIKE '" . $SKU_NAME . "%'";
-
+ AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND
+ DI_REF LIKE '" . $RESERVE_DOC . "%' AND SKU_NAME LIKE '" . $SKU_NAME . "%'" ;
 
 $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' ";
 
 // AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%' OR DI_REF LIKE 'BK03%' OR DI_REF LIKE 'BKSV%') AND TRD_UTQNAME like 'เส้น' ";
+
 /*
 $my_file = fopen("exp_qry_reserve.txt", "w") or die("Unable to open file!");
 fwrite($my_file, $String_Sql);
