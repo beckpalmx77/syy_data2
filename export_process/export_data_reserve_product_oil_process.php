@@ -154,13 +154,13 @@ WHERE
 $String_Sql = $sql_reserve . " AND DI_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' ";
 
 // AROE.AROE_ARCD=ARCONDITION.ARCD_KEY AND (DI_REF LIKE 'BK02%' OR DI_REF LIKE 'BK03%' OR DI_REF LIKE 'BKSV%') AND TRD_UTQNAME like 'เส้น' ";
+/*
+$my_file = fopen("exp_qry_reserve.txt", "w") or die("Unable to open file!");
+fwrite($my_file, $String_Sql);
+fclose($my_file);
+*/
 
-//$my_file = fopen("exp_qry_reserve.txt", "w") or die("Unable to open file!");
-//fwrite($my_file, $String_Sql);
-//fclose($my_file);
-
-
-$data = "วันที่,รายการ,จำนวน,ตำแหน่ง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
+$data = "วันที่,รายการ,จำนวน,จำนวนแถม,ตำแหน่ง,LOCATION,เลขที่เอกสาร,เทค,ชื่อลูกค้า\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
@@ -172,6 +172,7 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
     $data .= " " . $doc_date . ",";
     $data .= str_replace(",", "^", $row['SKU_CODE']) . ",";
     $data .= str_replace(",", "^", $row['TRD_QTY']) . ",";
+    $data .= str_replace(",", "^", $row['TRD_Q_FREE']) . ",";
     $data .= str_replace(",", "^", $row['WL_CODE']) . ",";
     $data .= " ,";
     $data .= $row['DI_REF'] . ",";
