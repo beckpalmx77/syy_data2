@@ -229,7 +229,7 @@ if (strlen($_SESSION['alogin']) == "" || strlen($_SESSION['department_id']) == "
                 'serverSide': true,
                 'serverMethod': 'post',
                 'ajax': {
-                    'url': 'model/manage_reserve_sac_process.php',
+                    'url': 'model/manage_reserve_stock_sac_process.php',
                     'data': formData,
                 },
                 'columns': [
