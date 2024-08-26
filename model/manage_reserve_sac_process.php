@@ -6,7 +6,7 @@ include("../config/connect_sqlserver.php");
 include('../config/connect_db.php');
 include('../config/lang.php');
 include('../util/record_util.php');
-include('../cond_file/query_reserve_stock_sac.php');
+include('../cond_file/query_reserve_sac.php');
 
 
 if ($_POST["action"] === 'GET_RESERVE_PRODUCT') {
