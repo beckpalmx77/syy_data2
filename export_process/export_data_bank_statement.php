@@ -53,16 +53,16 @@ if ($row_start) {
 
 // เขียนหัวตาราง
 fputcsv($output, [
-    'BSTM_RECNL_DD',
-    'BNKAC_NAME',
-    'BSTM_CREDIT',
-    'BSTM_DEBIT',
+    'วันที่',
+    'ธนาคาร',
+    'เครดิต',
+    'เดบิต',
     'ยอดคงเหลือ',
-    'BSTM_REMARK',
-    'DI_DATE',
-    'DI_REF',
-    'CQBK_CHEQUE_DD',
-    'BSTM_CHEQUE_NO'
+    'หมายเหตุ',
+    'วันที่เอกสาร',
+    'เลขที่เอกสาร',
+    'วันที่เช๊ค',
+    'หมายเลขเช๊ค'
 ]);
 
 // แสดงยอดยกมา
