@@ -4,7 +4,7 @@ if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
 } else {
 
-    include("../config/connect_sqlserver.php");
+    include("config/connect_sqlserver.php");
 
     $sql_bank = "SELECT BNKAC_KEY,CONCAT(BNKAC_CODE, ' : ', BNKAC_NAME) BNKAC_NAME
     FROM BANKACCOUNT WHERE BNKAC_ENABLED = 'Y' 
