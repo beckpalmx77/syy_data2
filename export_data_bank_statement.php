@@ -56,7 +56,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                     <div class="panel-body">
 
                                                         <form id="from_data" method="post"
-                                                              action="export_process/export_data_bank_statement.php"
+                                                              action=""
                                                               enctype="multipart/form-data">
 
                                                             <div class="modal-body">
@@ -115,8 +115,12 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                        id="save_status"/>
                                                                 <input type="hidden" name="action" id="action"
                                                                        value=""/>
-                                                                <button type="submit" class="btn btn-success"
+                                                                <button type="button" class="btn btn-success"
                                                                         id="btnExport"> Export <i
+                                                                            class="fa fa-check"></i>
+                                                                </button>
+                                                                <button type="button" class="btn btn-primary"
+                                                                        id="btnDisplay"> Display <i
                                                                             class="fa fa-check"></i>
                                                                 </button>
                                                                 <!--button type="button" class="btn btn-danger"
@@ -223,6 +227,26 @@ if (strlen($_SESSION['alogin']) == "") {
                 todayHighlight: true,
                 language: "th",
                 autoclose: true
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // ฟังก์ชันสำหรับปุ่ม Export
+            $('#btnExport').click(function() {
+                const exportUrl = 'export_process/export_data_bank_statement.php';
+
+                // ส่งข้อมูลฟอร์มไปยัง exportUrl โดยใช้ jQuery submit
+                $('#from_data').attr('action', exportUrl).attr('target', '_self').submit();
+            });
+
+            // ฟังก์ชันสำหรับปุ่ม Display
+            $('#btnDisplay').click(function() {
+                const displayUrl = 'show_bank_statement.php';
+
+                // เปิดหน้าใหม่และส่งข้อมูลฟอร์มไปยัง displayUrl
+                $('#from_data').attr('action', displayUrl).attr('target', '_blank').submit();
             });
         });
     </script>
