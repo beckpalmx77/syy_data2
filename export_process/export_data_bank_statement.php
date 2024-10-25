@@ -38,8 +38,8 @@ fputcsv($output, []);  // เพิ่มบรรทัดว่าง
 
 // Query 1: ดึงยอดยกมา
 $sql_start_balance = "SELECT * FROM BSTMPERIOD 
-                      WHERE BSTMP_BNKAC = " . $bank . "   
-                      AND BSTMP_ST_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "'";
+ WHERE BSTMP_BNKAC = " . $bank . "   
+ AND BSTMP_ST_DATE BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "'";
 
 $stmt_start = $conn_sqlsvr->prepare($sql_start_balance);
 $stmt_start->execute();
@@ -70,24 +70,24 @@ $current_balance = $start_balance;  // กำหนดยอดยกมาเ�
 fputcsv($output, ['', '', '', 'ยอดยกมา', number_format($current_balance, 2), '', '', '', '', '']);
 
 // Query 2: ดึงรายการธุรกรรม
-$sql_transactions = "SELECT                             
-                            FORMAT(BANKSTATEMENT.BSTM_RECNL_DD, 'dd/MM/yyyy') AS BSTM_RECNL_DD,
-                            BANKACCOUNT.BNKAC_CODE, 
-                            BANKACCOUNT.BNKAC_NAME,
-                            BANKSTATEMENT.BSTM_CREDIT, 
-                            BANKSTATEMENT.BSTM_DEBIT, 
-                            BANKSTATEMENT.BSTM_REMARK, 
-                            FORMAT(DOCINFO.DI_DATE, 'dd/MM/yyyy') AS DI_DATE, 
-                            DOCINFO.DI_REF,    
-                            FORMAT(CHEQUEBOOK.CQBK_CHEQUE_DD, 'dd/MM/yyyy') AS CQBK_CHEQUE_DD,
-                            BANKSTATEMENT.BSTM_CHEQUE_NO 
-                     FROM BANKSTATEMENT 
-                     LEFT JOIN BANKACCOUNT ON BANKACCOUNT.BNKAC_KEY = BANKSTATEMENT.BSTM_BNKAC
-                     LEFT JOIN DOCINFO ON DOCINFO.DI_KEY = BANKSTATEMENT.BSTM_DI
-                     LEFT JOIN CHEQUEBOOK ON CHEQUEBOOK.CQBK_REFER_REF = DOCINFO.DI_REF
-                     WHERE BANKACCOUNT.BNKAC_KEY = " . $bank . "   
-                     AND BANKSTATEMENT.BSTM_RECNL_DD BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' 
-                     ORDER BY BANKSTATEMENT.BSTM_RECNL_DD";
+$sql_transactions = "SELECT 
+FORMAT(BANKSTATEMENT.BSTM_RECNL_DD, 'dd/MM/yyyy') AS BSTM_RECNL_DD,
+BANKACCOUNT.BNKAC_CODE, 
+BANKACCOUNT.BNKAC_NAME,
+BANKSTATEMENT.BSTM_CREDIT, 
+BANKSTATEMENT.BSTM_DEBIT, 
+BANKSTATEMENT.BSTM_REMARK, 
+FORMAT(DOCINFO.DI_DATE, 'dd/MM/yyyy') AS DI_DATE, 
+DOCINFO.DI_REF,    
+FORMAT(CHEQUEBOOK.CQBK_CHEQUE_DD, 'dd/MM/yyyy') AS CQBK_CHEQUE_DD,
+BANKSTATEMENT.BSTM_CHEQUE_NO 
+FROM BANKSTATEMENT 
+LEFT JOIN BANKACCOUNT ON BANKACCOUNT.BNKAC_KEY = BANKSTATEMENT.BSTM_BNKAC
+LEFT JOIN DOCINFO ON DOCINFO.DI_KEY = BANKSTATEMENT.BSTM_DI
+LEFT JOIN CHEQUEBOOK ON CHEQUEBOOK.CQBK_REFER_REF = DOCINFO.DI_REF
+WHERE DOCINFO.DI_ACTIVE = 0 AND BANKACCOUNT.BNKAC_KEY = " . $bank . "   
+AND BANKSTATEMENT.BSTM_RECNL_DD BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' 
+ORDER BY BANKSTATEMENT.BSTM_RECNL_DD";
 
 $stmt_transactions = $conn_sqlsvr->prepare($sql_transactions);
 $stmt_transactions->execute();
@@ -100,16 +100,16 @@ foreach ($transactions as $transaction) {
 
     // แสดงผลในแต่ละบรรทัด
     fputcsv($output, [
-        $transaction['BSTM_RECNL_DD'],
-        $transaction['BNKAC_NAME'],
-        number_format($transaction['BSTM_CREDIT'], 2),
-        number_format($transaction['BSTM_DEBIT'], 2),
-        number_format($current_balance, 2),
-        $transaction['BSTM_REMARK'],
-        $transaction['DI_DATE'],
-        $transaction['DI_REF'],
-        $transaction['CQBK_CHEQUE_DD'],
-        $transaction['BSTM_CHEQUE_NO']
+ $transaction['BSTM_RECNL_DD'],
+ $transaction['BNKAC_NAME'],
+ number_format($transaction['BSTM_CREDIT'], 2),
+ number_format($transaction['BSTM_DEBIT'], 2),
+ number_format($current_balance, 2),
+ $transaction['BSTM_REMARK'],
+ $transaction['DI_DATE'],
+ $transaction['DI_REF'],
+ $transaction['CQBK_CHEQUE_DD'],
+ $transaction['BSTM_CHEQUE_NO']
     ]);
 }
 
