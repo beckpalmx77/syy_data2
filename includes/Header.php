@@ -13,7 +13,7 @@
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="css/myadmin.css?v=1001" rel="stylesheet">
+    <link href="css/myadmin.css" rel="stylesheet">
 
     <link rel="stylesheet" href="vendor/alertify/css/alertify.core.css"/>
     <link rel="stylesheet" href="vendor/alertify/css/alertify.default.css"/>
@@ -38,6 +38,8 @@
 
     <link rel="stylesheet" type="text/css" href="../css/datatables1115.css">
     <script type="text/javascript" charset="utf8" src="../js/datatables1115.js"></script>
+
+    <script src="../js/subscript.js"></script>
 
     <?php
     session_start();

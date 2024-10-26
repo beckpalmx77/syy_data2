@@ -73,6 +73,7 @@ $transactions = $stmt_transactions->fetchAll(PDO::FETCH_ASSOC);
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/myadmin.min.js"></script>
+    <script src="js/subscript.js"></script>
 </head>
 <body id="page-top">
 
@@ -144,25 +145,6 @@ $transactions = $stmt_transactions->fetchAll(PDO::FETCH_ASSOC);
         font-size: 18px;
     }
 </style>
-
-<script>
-    $(document).ready(function() {
-        // แสดง/ซ่อนปุ่ม Scroll to Bottom เมื่อ scroll ลงมา
-        $(window).scroll(function() {
-            if ($(window).scrollTop() < $(document).height() - $(window).height() - 300) { // ปรับค่าตามที่ต้องการ
-                $('.scroll-to-bottom').fadeIn();
-            } else {
-                $('.scroll-to-bottom').fadeOut();
-            }
-        });
-
-        // เลื่อนไปที่ตำแหน่งล่างสุดเมื่อกดปุ่ม Scroll to Bottom
-        $('.scroll-to-bottom').click(function() {
-            $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
-        });
-    });
-</script>
-
 
 
 <!-- Scroll to top -->
