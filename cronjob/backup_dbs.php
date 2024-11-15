@@ -13,7 +13,7 @@ if (!file_exists($backupDir)) {
 }
 
 $databases = [
-    'sac_data2'
+    'syy_data2'
 ];
 
 // ตรวจสอบ path ของ mysqldump
