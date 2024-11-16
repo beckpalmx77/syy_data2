@@ -83,4 +83,3 @@ foreach ($databases as $database) {
         print_r($output);
     }
 }
-
