@@ -1,8 +1,20 @@
 @echo off
 set source=D:\BplusDB-BAKUP
-set destination=\\192.168.39.10\Back Bplus new\Bplus payroll
+set destination=\\192.168.39.10\BackBplusnew\Bplus_payroll
 
 xcopy %source%\* %destination% /E /H /C /I /Y
 
 echo Files copied from %source% to %destination%
-//del /f file.txt
+
+@echo off
+set source=D:\backups
+set destination=\\192.168.39.10\BackBplusnew\Syy_WebApp
+
+xcopy %source%\* %destination% /E /H /C /I /Y
+
+echo Files copied from %source% to %destination%
+
+
+
+
+REM del /f file.txt
