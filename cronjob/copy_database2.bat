@@ -55,4 +55,3 @@ echo Files copied from %source2% to %destination2%.
 
 echo.
 echo Copy process completed.
-pause
