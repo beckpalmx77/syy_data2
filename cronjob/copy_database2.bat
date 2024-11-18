@@ -55,3 +55,9 @@ echo Files copied from %source2% to %destination2%.
 
 echo.
 echo Copy process completed.
+
+del /q "%source1%\*.*"
+echo ลบไฟล์ใน %source1% เรียบร้อยแล้ว.
+
+del /q "%source2%\*.*"
+echo ลบไฟล์ใน %source2% เรียบร้อยแล้ว.
