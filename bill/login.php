@@ -103,12 +103,12 @@ include('../includes/Header.php');
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="author" content="สงวนออโต้คาร์ | SANGUAN AUTO CAR">
+    <meta name="author" content="สงวนยางยนต์ชุมพร | SYY">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="สงวนออโต้คาร์ | SANGUAN AUTO CAR">
+    <meta name="description" content="สงวนยางยนต์ชุมพร | SYY">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <link href="img/logo/Logo-01.png" rel="icon">
-    <title>สงวนออโต้คาร์ | SANGUAN AUTO CAR</title>
+    <title>สงวนยางยนต์ชุมพร | SYY</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 </head>
 
@@ -156,7 +156,7 @@ include('../includes/Header.php');
 
                 </div>
                 <div class="text-center mt-5 text-muted">
-                    Copyright &copy; <?php echo date("Y");?> &mdash; สงวนออโต้คาร์ | SAC
+                    Copyright &copy; <?php echo date("Y");?> &mdash; สงวนยางยนต์ชุมพร | SAC
                 </div>
             </div>
         </div>

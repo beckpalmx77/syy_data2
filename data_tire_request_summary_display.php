@@ -23,7 +23,7 @@ foreach ($MonthCurr as $row_curr) {
 
 <html>
 <head>
-    <title>สงวนออโต้คาร์ | SANGUAN AUTO CAR</title>
+    <title>สงวนยางยนต์ชุมพร | SYY</title>
     <meta charset="UTF-8">
     <meta date="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
