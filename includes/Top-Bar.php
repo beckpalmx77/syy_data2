@@ -4,6 +4,7 @@
     <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
         <i class="fa fa-bars"></i>
     </button>
+    <div class="text-white" id="clock"></div>
     <ul class="navbar-nav ml-auto">
 
         <li class="nav-item dropdown no-arrow mx-1">
@@ -43,7 +44,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
                aria-haspopup="true" aria-expanded="false">
                 <img class="img-profile rounded-circle" src="img/boy.png" style="max-width: 60px">
-                <span class="ml-2 d-none d-lg-inline text-white small"><?php echo $_SESSION['first_name'] . " " . $_SESSION['last_name']; ?></span>
+                <span class="ml-2 d-none d-lg-inline text-white small"><?php echo $_SESSION['doc_user_id'] . " " . $_SESSION['first_name'] . " " . $_SESSION['last_name']; ?></span>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <!--a class="dropdown-item" href="#">
@@ -99,9 +100,32 @@
         });
 
         //setInterval(function(){
-            //load_unseen_notification();;
+        //load_unseen_notification();;
         //}, 5000);
 
     });
 </script>
 <!-- Topbar -->
+
+<script>
+    function updateClock() {
+        const options = {
+            timeZone: 'Asia/Bangkok',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        const bangkokTime = new Intl.DateTimeFormat('th-TH', options).format(new Date());
+        document.getElementById('clock').textContent = bangkokTime;
+    }
+
+    // Update the clock every second
+    setInterval(updateClock, 1000);
+
+    // Initial call to display the clock immediately
+    updateClock();
+</script>
