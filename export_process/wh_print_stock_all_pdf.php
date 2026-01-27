@@ -30,7 +30,7 @@ $filter_desc_arr = [];
 $where[] = "DOCINFO.DI_ACTIVE = 0";
 $where[] = "SKUMASTER.SKU_ENABLE = 'Y'";
 // $where[] = "TRANSTKH.TRH_LSTATUS = 1";
-$where[] = "WARELOCATION.WL_CODE = 'K3'";        // บังคับคลัง K3
+$where[] = "WARELOCATION.WL_CODE = 'SYY'";        // บังคับคลัง K3
 $where[] = "UOFQTY.UTQ_NAME LIKE '%เส้น%'";       // บังคับหน่วยเส้น
 
 // --- 2.2 Date Range (รับจาก Front End) ---
