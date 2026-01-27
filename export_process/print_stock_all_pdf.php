@@ -116,7 +116,7 @@ ORDER BY
 ";
 
 // Debug Query (ถ้าต้องการดู Query ให้ uncomment บรรทัดล่าง)
-// file_put_contents("debug_query.txt", $String_Sql);
+//file_put_contents("a_debug_query.txt", $String_Sql);
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
