@@ -3,62 +3,73 @@ date_default_timezone_set('Asia/Bangkok');
 include('../config/connect_sqlserver.php');
 
 // =========================================================
-// 1. รับค่า Filter
+// 1. Helper Function
 // =========================================================
-
-// ฟังก์ชัน Helper
 function quoteArray($arr, $conn) {
     return array_map(function ($v) use ($conn) {
         return $conn->quote(trim($v));
     }, $arr);
 }
 
-// ตัวแปรสำหรับชื่อไฟล์
-$date_suffix = date('Ymd');
-$as_of_date_show = date('d/m/Y'); // ใช้วันปัจจุบันเป็น Default
+// =========================================================
+// 2. รับค่า Filter และเตรียมเงื่อนไข SQL
+// =========================================================
 
-// --- เตรียมเงื่อนไข SQL (Dynamic SQL Parts) ---
 $sql_condition = "";
+$date_suffix = date('Ymd');
+$as_of_date_show = date('d/m/Y'); // Default เป็นวันปัจจุบัน
 
-// 1. Date Range: น้อยกว่าหรือเท่ากับวันที่สิ้นสุด (Stock Balance As Of)
+// 2.1 Date Range (ยอดคงเหลือ ณ วันที่)
 if (!empty($_POST['end_date'])) {
     $end = $conn_sqlsvr->quote($_POST['end_date']);
-
-    // เพิ่มเงื่อนไขวันที่เข้าไป
     $sql_condition .= " AND DOCINFO.DI_DATE <= $end ";
 
-    // ตั้งชื่อไฟล์และตัวแปรสำหรับแสดงใน CSV
-    $date_suffix = $_POST['end_date'];
-    if(!empty($_POST['start_date'])) {
-        $date_suffix = $_POST['start_date'] . "_" . $_POST['end_date'];
-    }
+    // ตั้งชื่อไฟล์และตัวแปรแสดงผล
+    $date_suffix = str_replace('-', '', $_POST['end_date']);
     $as_of_date_show = date_format(date_create($_POST['end_date']), "d/m/Y");
 }
 
-// 2. ICCAT: จากหน้าจอ
+// 2.2 Warehouse (คลังสินค้า) - แก้ไขให้รับ wh_codes[]
+if (!empty($_POST['wh_codes'])) {
+    if (is_array($_POST['wh_codes'])) {
+        $in = implode(',', quoteArray($_POST['wh_codes'], $conn_sqlsvr));
+        $sql_condition .= " AND WH.WH_CODE IN ($in) ";
+    } else {
+        $val = $conn_sqlsvr->quote($_POST['wh_codes']);
+        $sql_condition .= " AND WH.WH_CODE = $val ";
+    }
+}
+
+// 2.3 ICCAT (หมวดสินค้า)
 if (!empty($_POST['icc_codes'])) {
     $in = implode(',', quoteArray($_POST['icc_codes'], $conn_sqlsvr));
     $sql_condition .= " AND ICCAT.ICCAT_CODE IN ($in) ";
-} else {
-    // กรณีไม่ได้เลือก (หรือจะใช้ Default list ก็ใส่ตรงนี้ได้)
-    // แต่ตาม Logic หน้าจอคือเลือกทั้งหมดอยู่แล้ว
 }
 
+// 2.4 Brand (ยี่ห้อ) - เพิ่มส่วนนี้
+if (!empty($_POST['brn_codes'])) {
+    $in = implode(',', quoteArray($_POST['brn_codes'], $conn_sqlsvr));
+    $sql_condition .= " AND BRAND.BRN_CODE IN ($in) ";
+}
+
+// 2.5 Location (ตำแหน่งเก็บ) - เพิ่มส่วนนี้
+if (!empty($_POST['wl_codes'])) {
+    $in = implode(',', quoteArray($_POST['wl_codes'], $conn_sqlsvr));
+    $sql_condition .= " AND WL.WL_CODE IN ($in) ";
+}
 
 // =========================================================
-// 2. ตั้งค่า Header CSV
+// 3. ตั้งค่า Header CSV
 // =========================================================
-$filename = "Stock_Balance_K3_" . $date_suffix . "_" . date('His') . ".csv";
+$filename = "Stock_Balance_" . $date_suffix . "_" . date('His') . ".csv";
 
 header('Content-type: text/csv; charset=UTF-8');
 header('Content-Encoding: UTF-8');
 header("Content-Disposition: attachment; filename=\"$filename\"");
 
-
 // =========================================================
-// 3. SQL Query (ใช้ SQL ตามที่คุณระบุเท่านั้น)
+// 4. SQL Query
 // =========================================================
-// หมายเหตุ: ตัด Hardcode List เดิมออก แล้วใส่ $sql_condition แทน
 $String_Sql = "
 SELECT 
     SM.SKU_CODE,
@@ -66,7 +77,7 @@ SELECT
     WH.WH_CODE,
     WH.WH_NAME,
     WL.WL_CODE,
-    ICCAT_CODE,
+    ICCAT.ICCAT_CODE,
     UQ.UTQ_NAME AS UNIT_NAME,
     SUM(SKM.SKM_QTY) AS SUM_QTY
 FROM 
@@ -80,7 +91,7 @@ FROM
     INNER JOIN dbo.WAREHOUSE WH WITH (NOLOCK) ON WL.WL_WH = WH.WH_KEY
     INNER JOIN dbo.DOCINFO WITH (NOLOCK) ON SKM.SKM_DI = DOCINFO.DI_KEY
     INNER JOIN dbo.DOCTYPE WITH (NOLOCK) ON DOCINFO.DI_DT = DOCTYPE.DT_KEY
-WHERE WL.WL_CODE = 'SYY' AND SM.SKU_ENABLE = 'Y'
+WHERE SM.SKU_ENABLE = 'Y' 
     $sql_condition
 GROUP BY 
     SM.SKU_CODE,
@@ -89,7 +100,7 @@ GROUP BY
     WH.WH_NAME,
     WL.WL_CODE,
     UQ.UTQ_NAME,
-    ICCAT_CODE
+    ICCAT.ICCAT_CODE
 HAVING 
     SUM(SKM.SKM_QTY) > 0
 ORDER BY 
@@ -99,29 +110,31 @@ ORDER BY
 ";
 
 // =========================================================
-// 4. ดึงข้อมูลและสร้าง Content CSV
+// 5. ประมวลผลและสร้าง CSV
 // =========================================================
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
 
-// หัวตาราง
-$data = "ยอดคงเหลือ ณ วันที่,รหัสสินค้า,สินค้า,คลัง,ที่เก็บ,หน่วยนับ,จำนวน\n";
+// สร้าง Header Column
+$csv_content = "ยอดคงเหลือ ณ วันที่,รหัสสินค้า,ชื่อสินค้า,หมวด,คลัง,ที่เก็บ,หน่วยนับ,จำนวน\n";
 
 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-    // CSV Content
-    $sku_code = str_replace(",", "^", $row['SKU_CODE']);
-    $sku_name = str_replace(",", "^", $row['SKU_NAME']);
-    $wh_code  = str_replace(",", "^", $row['WH_CODE']);
-    $wl_code  = str_replace(",", "^", $row['WL_CODE']);
-    $utq_name = str_replace(",", "^", $row['UNIT_NAME']); // ใช้ Alias UNIT_NAME ตาม SQL
+    // Clean Data (ป้องกัน Comma ทำ csv เพี้ยน)
+    $sku_code = str_replace(",", " ", $row['SKU_CODE']);
+    $sku_name = str_replace(",", " ", $row['SKU_NAME']);
+    $iccat    = str_replace(",", " ", $row['ICCAT_CODE']);
+    $wh_code  = str_replace(",", " ", $row['WH_CODE']);
+    $wl_code  = str_replace(",", " ", $row['WL_CODE']);
+    $utq_name = str_replace(",", " ", $row['UNIT_NAME']);
     $qty      = $row['SUM_QTY'];
 
-    // วันที่ในที่นี้คือ "ยอดคงเหลือ ณ วันที่" (End Date)
-    $data .= "$as_of_date_show,$sku_code,$sku_name,$wh_code,$wl_code,$utq_name,$qty\n";
+    // ต่อ String
+    $csv_content .= "$as_of_date_show,$sku_code,$sku_name,$iccat,$wh_code,$wl_code,$utq_name,$qty\n";
 }
 
 // =========================================================
-// 5. Output
+// 6. Output (แปลงเป็น Windows-874 สำหรับ Excel ภาษาไทย)
 // =========================================================
-echo iconv("utf-8", "windows-874//IGNORE", $data);
+echo iconv("utf-8", "windows-874//IGNORE", $csv_content);
 exit();
+?>

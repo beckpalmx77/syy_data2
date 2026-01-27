@@ -15,7 +15,7 @@ include('../config/connect_sqlserver.php');
 // 2. Logic การเตรียม Query (Filter Data)
 // =========================================================
 
-// Helper Function
+// Helper Function สำหรับ Quote ค่า Array เพื่อป้องกัน SQL Injection
 function quoteArray($arr, $conn)
 {
     return array_map(function ($v) use ($conn) {
@@ -26,16 +26,18 @@ function quoteArray($arr, $conn)
 $where = [];
 $filter_desc_arr = [];
 
-// WH_CODE
-if (!empty($_POST['WH_CODE'])) {
-    if (is_array($_POST['WH_CODE'])) {
-        $in = implode(',', quoteArray($_POST['WH_CODE'], $conn_sqlsvr));
+// --- [แก้ไข] รับค่า WH_CODE ให้ตรงกับหน้าจอ (name="wh_codes[]") ---
+if (!empty($_POST['wh_codes'])) {
+    // ตรวจสอบว่าเป็น Array หรือไม่ (ปกติ checkbox จะส่งมาเป็น array)
+    if (is_array($_POST['wh_codes'])) {
+        $in = implode(',', quoteArray($_POST['wh_codes'], $conn_sqlsvr));
         $where[] = "WH.WH_CODE IN ($in)";
-        $filter_desc_arr[] = "คลัง: " . implode(',', $_POST['WH_CODE']);
+        $filter_desc_arr[] = "คลัง: " . implode(',', $_POST['wh_codes']);
     } else {
-        $val = $conn_sqlsvr->quote($_POST['WH_CODE']);
+        // กรณีส่งมาค่าเดียว
+        $val = $conn_sqlsvr->quote($_POST['wh_codes']);
         $where[] = "WH.WH_CODE = $val";
-        $filter_desc_arr[] = "คลัง: " . $_POST['WH_CODE'];
+        $filter_desc_arr[] = "คลัง: " . $_POST['wh_codes'];
     }
 }
 
@@ -43,8 +45,11 @@ if (!empty($_POST['WH_CODE'])) {
 if (!empty($_POST['icc_codes'])) {
     $in = implode(',', quoteArray($_POST['icc_codes'], $conn_sqlsvr));
     $where[] = "ICCAT.ICCAT_CODE IN ($in)";
-    preg_match_all("/'([^']+)'/", $in, $matches);
-    $filter_desc_arr[] = "หมวด: " . implode(',', $matches[1]);
+
+    // ดึงชื่อหมวดมาแสดงใน Header (Optional)
+    // preg_match_all("/'([^']+)'/", $in, $matches);
+    // $filter_desc_arr[] = "หมวด: " . implode(',', $matches[1]);
+    $filter_desc_arr[] = "ระบุหมวดสินค้า";
 }
 
 // BRAND
@@ -59,9 +64,10 @@ if (!empty($_POST['wl_codes'])) {
     $where[] = "WL.WL_CODE IN ($in)";
 }
 
+// SKU Enable Check
 $where[] = "SM.SKU_ENABLE = 'Y'";
 
-// รวม WHERE
+// รวม WHERE Clause
 $WHERE_SQL = "";
 if (!empty($where)) {
     $WHERE_SQL = "WHERE " . implode(' AND ', $where);
@@ -109,6 +115,9 @@ ORDER BY
     SM.SKU_CODE ASC
 ";
 
+// Debug Query (ถ้าต้องการดู Query ให้ uncomment บรรทัดล่าง)
+// file_put_contents("debug_query.txt", $String_Sql);
+
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -135,7 +144,7 @@ $mpdf = new \Mpdf\Mpdf([
     'autoLangToFont' => true,
 
     'fontDir' => array_merge($fontDirs, [
-        '../fonts',
+        '../fonts', // ตรวจสอบ path font ให้ถูกต้อง
     ]),
     'fontdata' => $fontData + [
             'prompt' => [
@@ -273,12 +282,12 @@ foreach ($results as $row) {
 
         // เริ่มกลุ่มใหม่
         $current_wh = $row['WH_CODE'];
-        $current_wh_name = $row['WH_NAME'];
+        $current_wh_name = $row['WH_NAME']; // ใช้หากต้องการแสดงชื่อเต็ม
         $sub_qty = 0;
 
         $html .= '
         <tr class="group-header">
-            <td colspan="' . $total_cols . '">คลังสินค้า: ' . htmlspecialchars($current_wh) . '</td>
+            <td colspan="' . $total_cols . '">คลังสินค้า: ' . htmlspecialchars($current_wh) . ' - ' . htmlspecialchars($current_wh_name) . '</td>
         </tr>';
     }
 
@@ -286,7 +295,7 @@ foreach ($results as $row) {
     $html .= '<tr>';
     $html .= '<td>' . htmlspecialchars($row['SKU_CODE']) . '</td>';
     $html .= '<td>' . htmlspecialchars($row['SKU_NAME']) . '</td>';
-    $html .= '<td class="text-center">' . htmlspecialchars($row['WH_CODE']) . '</td>'; // เพิ่มการแสดงผลข้อมูลคลัง
+    $html .= '<td class="text-center">' . htmlspecialchars($row['WH_CODE']) . '</td>';
     $html .= '<td class="text-center">' . htmlspecialchars($row['WL_CODE']) . '</td>';
     $html .= '<td class="text-center">' . htmlspecialchars($row['UNIT_NAME']) . '</td>';
     $html .= '<td class="text-right">' . number_format($row['SUM_QTY'], 2) . '</td>';
@@ -296,7 +305,7 @@ foreach ($results as $row) {
     $grand_qty += $row['SUM_QTY'];
 }
 
-// ปิดยอดกลุ่มสุดท้าย
+// ปิดยอดกลุ่มสุดท้าย (ถ้ามีข้อมูล)
 if ($current_wh !== null) {
     $html .= '
     <tr class="group-total">
@@ -328,3 +337,4 @@ $mpdf->WriteHTML($html);
 $filename = "Stock_Location_Report_" . date('Ymd_His') . ".pdf";
 $mpdf->Output($filename, 'I');
 exit();
+?>
