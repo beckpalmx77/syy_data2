@@ -213,7 +213,7 @@ $printTime = date('H:i:s');
 
 $headerHtml = '
 <div style="width:100%;">
-    <div style="float:left; width:30%; font-size:12pt; font-weight:bold;">บริษัท สงวนออโต้คาร์ จำกัด</div>
+    <div style="float:left; width:30%; font-size:12pt; font-weight:bold;">บริษัท สงวนยางยนต์ชุมพร จำกัด</div>
     <div style="float:right; width:30%; text-align:right;">พิมพ์เมื่อ: ' . $thaiDate . ' ' . $printTime . '</div>
     <div style="clear:both;"></div>
     
