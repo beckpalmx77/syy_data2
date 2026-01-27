@@ -175,11 +175,11 @@ $printTime = date('H:i:s');
 
 $headerHtml = '
 <div style="width:100%;">
-    <div style="float:left; width:30%; font-size:12pt; font-weight:bold;">บริษัท สงวนออโต้คาร์ จำกัด</div>
+    <div style="float:left; width:30%; font-size:12pt; font-weight:bold;">บริษัท สงวนยางยนต์ชุมพร จำกัด</div>
     <div style="float:right; width:30%; text-align:right;">พิมพ์เมื่อ: ' . $thaiDate . ' ' . $printTime . '</div>
     <div style="clear:both;"></div>
     
-    <div style="text-align:center; font-size:16pt; font-weight:bold; margin-top:5px;">รายงานยอดคงเหลือ Stock Balance (K3)</div>
+    <div style="text-align:center; font-size:16pt; font-weight:bold; margin-top:5px;">รายงานยอดคงเหลือ Stock Balance</div>
     
     <table style="width:100%; margin-top:10px; border:none; font-size:10pt;">
         <tr>            
