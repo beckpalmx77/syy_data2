@@ -154,11 +154,11 @@ $presets = $stmt_preset->fetchAll(PDO::FETCH_ASSOC);
                                                 <i class="fas fa-eraser"></i> ล้างค่า
                                             </button>
 
-                                            <button type="submit" form="exportForm" class="btn btn-info mr-1"
+                                            <!--button type="submit" form="exportForm" class="btn btn-info mr-1"
                                                     formaction="export_process/print_stock_all_pdf"
                                                     formtarget="_blank">
                                                 <i class="fa fa-file-pdf"></i> Print PDF
-                                            </button>
+                                            </button-->
 
                                             <button type="submit" form="exportForm" class="btn btn-success">
                                                 <i class="fa fa-file-excel"></i> Export Excel
@@ -169,6 +169,22 @@ $presets = $stmt_preset->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
 
                                 <form method="post" id="exportForm" action="export_process/export_data_stock_balance_all_process.php">
+
+                                    <div class="form-group">
+                                        <label>เงื่อนไขยอดคงเหลือ:</label><br>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="stock_all" name="stock_filter" class="custom-control-input" value="all" checked>
+                                            <label class="custom-control-label" for="stock_all">ทั้งหมด</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="stock_gt_0" name="stock_filter" class="custom-control-input" value="gt_0">
+                                            <label class="custom-control-label" for="stock_gt_0">ยอดคงเหลือ > 0</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="stock_eq_0" name="stock_filter" class="custom-control-input" value="eq_0">
+                                            <label class="custom-control-label" for="stock_eq_0">ยอดคงเหลือ <= 0</label>
+                                        </div>
+                                    </div>
 
                                     <fieldset class="mb-4">
                                         <legend class="text-info">

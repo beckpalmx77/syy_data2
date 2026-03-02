@@ -21,12 +21,25 @@ function quoteArray($arr, $conn) {
 $where = [];
 $filename_suffix = "All";
 
+// --- รับค่าเงื่อนไขสต็อก (เพิ่มใหม่) ---
+$stock_filter = $_POST['stock_filter'] ?? 'all';
+$HAVING_SQL = "";
+
+if ($stock_filter === 'gt_0') {
+    $HAVING_SQL = "HAVING SUM(SKM.SKM_QTY) > 0";
+} elseif ($stock_filter === 'eq_0') {
+    $HAVING_SQL = "HAVING SUM(SKM.SKM_QTY) = 0";
+} else {
+    // กรณี 'all' หรืออื่นๆ (แสดงทั้งหมดรวมยอดติดลบถ้ามี)
+    $HAVING_SQL = "";
+}
+
 // --- แก้ไข: รับค่าคลังสินค้า (wh_codes) ---
 if (!empty($_POST['wh_codes'])) {
     if (is_array($_POST['wh_codes'])) {
         $in = implode(',', quoteArray($_POST['wh_codes'], $conn_sqlsvr));
         $where[] = "WH.WH_CODE IN ($in)";
-        $filename_suffix = "Multi-WH"; // ตั้งชื่อไฟล์แบบกลางๆ
+        $filename_suffix = "Multi-WH";
     } else {
         $val = $conn_sqlsvr->quote($_POST['wh_codes']);
         $where[] = "WH.WH_CODE = $val";
@@ -62,15 +75,6 @@ if (!empty($where)) {
 }
 
 // =========================================================
-// 3. ตั้งค่า Header CSV
-// =========================================================
-$filename = "Stock_Balance_" . $filename_suffix . "_" . date('Ymd-His') . ".csv";
-
-header('Content-type: text/csv; charset=UTF-8');
-header('Content-Encoding: UTF-8');
-header("Content-Disposition: attachment; filename=\"$filename\"");
-
-// =========================================================
 // 4. SQL Query
 // =========================================================
 $String_Sql = "
@@ -101,8 +105,7 @@ GROUP BY
     WL.WL_CODE,
     ICCAT.ICCAT_CODE,
     UQ.UTQ_NAME
-HAVING 
-    SUM(SKM.SKM_QTY) > 0
+$HAVING_SQL
 ORDER BY 
     WH.WH_CODE,
     WL.WL_CODE,
@@ -110,7 +113,16 @@ ORDER BY
 ";
 
 // =========================================================
-// 5. ดึงข้อมูลและสร้าง Content CSV
+// 5. Debug ส่วนการเขียนไฟล์ (ทำก่อนส่ง Header)
+// =========================================================
+$debug_file = __DIR__ . '/debug_sql_command.txt';
+$log_content = "--- Log Time: " . date('Y-m-d H:i:s') . " ---\n";
+$log_content .= "Stock Filter Option: " . $stock_filter . "\n";
+$log_content .= $String_Sql . "\n\n";
+//file_put_contents($debug_file, $log_content, FILE_APPEND);
+
+// =========================================================
+// 6. ดึงข้อมูลและสร้าง Content CSV
 // =========================================================
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
@@ -119,19 +131,23 @@ $query->execute();
 $data = "รหัสสินค้า,สินค้า,หมวด,คลัง,ที่เก็บ,หน่วยนับ,จำนวน\n";
 
 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-    // ใช้ str_replace แทน comma ด้วย ^ ตามรูปแบบเดิมของคุณ
     $data .= str_replace(",", "^", $row['SKU_CODE']) . ",";
     $data .= str_replace(",", "^", $row['SKU_NAME']) . ",";
-    $data .= str_replace(",", "^", $row['ICCAT_CODE']) . ","; // เพิ่มหมวด
+    $data .= str_replace(",", "^", $row['ICCAT_CODE']) . ",";
     $data .= str_replace(",", "^", $row['WH_CODE']) . ",";
     $data .= str_replace(",", "^", $row['WL_CODE']) . ",";
     $data .= str_replace(",", "^", $row['UNIT_NAME']) . ",";
-    $data .= $row['SUM_QTY'] . "\n";
+    $data .= number_format($row['SUM_QTY'], 2, '.', '') . "\n";
 }
 
 // =========================================================
-// 6. Output (Windows-874 สำหรับ Excel ภาษาไทย)
+// 7. Output (ตั้งค่า Header และส่งไฟล์)
 // =========================================================
+$filename = "Stock_Balance_" . $filename_suffix . "_" . date('Ymd-His') . ".csv";
+
+header('Content-type: text/csv; charset=UTF-8');
+header("Content-Disposition: attachment; filename=\"$filename\"");
+
+// แปลงเป็น Windows-874 สำหรับ Excel ภาษาไทย
 echo iconv("utf-8", "windows-874//IGNORE", $data);
 exit();
-?>
