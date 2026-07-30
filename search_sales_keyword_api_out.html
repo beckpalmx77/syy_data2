@@ -533,12 +533,12 @@
                 <i class="fa-solid fa-lightbulb"></i> 1. แนวคิดและเป้าหมาย (Concept & Objectives)
             </h2>
             <p>
-                บริการ REST API นี้สร้างขึ้นเพื่อให้พนักงานขายหรือระบบภายนอก (เช่น Mobile App, CRM, POS) สามารถค้นหาประวัติการซื้อขายสินค้าย้อนหลังได้อย่างรวดเร็ว จากการพิมพ์คีย์เวิร์ดรหัสสินค้า หรือขนาดยาง/ยี่ห้อ (เช่น พิมพ์ <code>"2157015"</code> ระบบจะจับคู่ตรงกับ <code>"215/70R15"</code> หรือ <code>"215-70-15"</code> โดยอัตโนมัติ)
+                บริการ REST API นี้สร้างขึ้นเพื่อให้พนักงานขายหรือระบบภายนอก (เช่น Mobile App, CRM, POS) สามารถค้นหาประวัติการซื้อขายสินค้าย้อนหลังได้อย่างรวดเร็ว จากการพิมพ์คีย์เวิร์ดรหัสสินค้า หรือขนาดยาง/ยี่ห้อใน <code>SKU_NAME</code> (เช่น พิมพ์คีย์เวิร์ด <code>"2157015"</code> ระบบจะจับคู่ค้นหาใน <code>SKU_NAME</code> และตรงกับชื่อสินค้า <code>"215/70R15 8PR ATLAS/R772"</code> หรือ <code>"215-70-15"</code> โดยอัตโนมัติ)
             </p>
             <br>
             <p><strong>คุณสมบัติหลักของ Sales Keyword Search API:</strong></p>
             <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
-                <li><strong>Smart Pattern Matching:</strong> ค้นหาแบบ <code>LIKE</code> ทั้งบนรหัสสินค้า (`SKU_CODE`), ชื่อสินค้า (`SKU_NAME`) และชื่อที่ตัดอักขระพิเศษ (Slash `/`, Dash `-`, Space ` `) เพื่อความสะดวกในการพิมพ์ค้นหา</li>
+                <li><strong>Smart SKU_NAME Pattern Matching:</strong> ค้นหาแบบ <code>LIKE</code> ทั้งบนรหัสสินค้า (`SKU_CODE`), ชื่อสินค้า (`SKU_NAME`) และชื่อที่ตัดอักขระพิเศษ (Slash <code>/</code>, Dash <code>-</code>, Space <code> </code> และตัวอักษรรัศมีขนาดยาง <code>R/r</code>) ช่วยให้พิมพ์เพียง <code>"2157015"</code> ก็เจอ <code>"215/70R15 8PR ATLAS/R772"</code> ได้ทันที</li>
                 <li><strong>Customer Filter:</strong> รองรับการระบุรหัสลูกค้า (`ar_code` เช่น <code>"KS-อ003783"</code>) หรือชื่อลูกค้าเพื่อเจาะจงค้นหาประวัติซื้อขายของลูกค้ารายนั้นๆ</li>
                 <li><strong>Required Minimum Fields:</strong> ส่งคืนข้อมูลสำคัญครบถ้วน: วันที่ (`DI_DATE`), รหัสสินค้า (`SKU_CODE`), ชื่อสินค้า (`SKU_NAME`), ราคาขายต่อหน่วย (`TRD_U_PRC`), จำนวนขาย (`TRD_QTY`), ส่วนลด (`TRD_TDSC_KEYINV`), และสต๊อกคงเหลือปัจจุบัน (`SKU_STOCK`)</li>
                 <li><strong>WITH (NOLOCK) Performance:</strong> อ่านข้อมูลประวัติการขายด้วย `WITH (NOLOCK)` ไม่บล็อกการทำงานของระบบหลัก</li>
@@ -565,7 +565,7 @@
                     <div class="step-number">2</div>
                     <div class="step-title">Pattern Normalization</div>
                     <div class="step-desc">
-                        นำคีย์เวิร์ดมาตัดเครื่องหมาย <code>/</code>, <code>-</code> และช่องว่างออก เพื่อสร้างเงื่อนไข SQL Pattern Matching 3 ทิศทาง
+                        นำคีย์เวิร์ดค้นหาและ <code>SKU_NAME</code> มาประมวลผลด้วย SQL <code>REPLACE</code> ตัดเครื่องหมาย <code>/</code>, <code>-</code>, ช่องว่าง และตัวอักษร <code>R</code> ออกเพื่อจับคู่ <code>"2157015"</code> เข้ากับ <code>"215/70R15"</code>
                     </div>
                 </div>
 
@@ -647,7 +647,7 @@
                         <td class="param-name">keyword</td>
                         <td><span class="param-type">string</span></td>
                         <td><span>แนะนำ</span></td>
-                        <td>คีย์เวิร์ดรหัสสินค้า ขนาดยาง หรือชื่อสินค้า (เช่น <code>"2157015"</code>, <code>"215/70R15"</code>, <code>"ATLAS"</code>)</td>
+                        <td>คีย์เวิร์ดรหัสสินค้า ขนาดยาง หรือชื่อสินค้า ใน <code>SKU_NAME</code> (เช่น <code>"2157015"</code> เพื่อค้นหา <code>"215/70R15 8PR ATLAS/R772"</code>)</td>
                     </tr>
                     <tr>
                         <td class="param-name">limit</td>

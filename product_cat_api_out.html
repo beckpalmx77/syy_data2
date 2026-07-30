@@ -545,7 +545,7 @@
                 <i class="fa-solid fa-tags"></i> Product Category Export API
             </h1>
             <p class="hero-subtitle">
-                เอกสารข้อกำหนดทางเทคนิค แนวคิด และคู่มือการใช้งาน REST JSON API สำหรับส่งออกรหัสประเภทสินค้า (`ICCAT_CODE`) และชื่อประเภทสินค้า (`ICCAT_NAME`) ดึงข้อมูลผ่านไฟล์เงื่อนไข `cond_file/query-product-price-main.php`
+                เอกสารข้อกำหนดทางเทคนิค แนวคิด และคู่มือการใช้งาน REST JSON API สำหรับส่งออกรหัสประเภทสินค้า (`ICCAT_CODE`) และชื่อประเภทสินค้า (`ICCAT_NAME`) ดึงข้อมูลผ่านไฟล์เงื่อนไข `cond_file/query-product-price-main`
             </p>
             <div class="badge-group">
                 <span class="badge badge-success"><i class="fa-solid fa-check"></i> Status: Active</span>
@@ -565,7 +565,7 @@
             <br>
             <p><strong>คุณสมบัติหลักของ Product Category Export API:</strong></p>
             <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
-                <li><strong>Shared Data Condition:</strong> เชื่อมตาราง `ICCAT` กับโครงสร้างสินค้าหลักผ่านไฟล์ <code>cond_file/query-product-price-main.php</code> การันตีว่าเป็นประเภทสินค้าที่มีการใช้งานจริงในระบบ</li>
+                <li><strong>Shared Data Condition:</strong> เชื่อมตาราง `ICCAT` กับโครงสร้างสินค้าหลักผ่านไฟล์ <code>cond_file/query-product-price-main</code> การันตีว่าเป็นประเภทสินค้าที่มีการใช้งานจริงในระบบ</li>
                 <li><strong>Multi-Category Array Filtering:</strong> พารามิเตอร์ <code>iccat_code</code> รองรับการค้นหาแบบ Array (เช่น <code>["603", "101-BS01"]</code>) หรือการค้นหาคำสำคัญ (เช่น <code>"ยาง"</code>, <code>"น้ำมัน"</code>)</li>
                 <li><strong>WITH (NOLOCK) Performance:</strong> ทำงานด้วยคำสั่ง <code>WITH (NOLOCK)</code> ประมวลผลได้อย่างมีประสิทธิภาพสูงสุดโดยไม่ทำให้ฐานข้อมูลเกิด Deadlock</li>
                 <li><strong>Clean JSON Output:</strong> คืนค่าเฉพาะ `ICCAT_CODE` และ `ICCAT_NAME` ในรูปแบบ UTF-8 JSON ที่กระชับ ประหยัด Bandwidth</li>
@@ -592,7 +592,7 @@
                     <div class="step-number">2</div>
                     <div class="step-title">Query Condition Load</div>
                     <div class="step-desc">
-                        โหลดไฟล์เงื่อนไข <code>cond_file/query-product-price-main.php</code> ที่มี Table Join สินค้าและหมวดหมู่ครบถ้วน
+                        โหลดไฟล์เงื่อนไข <code>cond_file/query-product-price-main</code> ที่มี Table Join สินค้าและหมวดหมู่ครบถ้วน
                     </div>
                 </div>
 

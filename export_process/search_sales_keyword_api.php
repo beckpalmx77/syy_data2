@@ -53,10 +53,12 @@ if ($ar_code_input !== '') {
 // Filter Keyword (SKU Code / Name)
 if ($keyword_input !== '') {
     $keyword_clean = str_replace(['/', '-', ' '], '', $keyword_input);
-    $where_conds[] = "(SKUMASTER.SKU_CODE LIKE :kw1 OR SKUMASTER.SKU_NAME LIKE :kw2 OR REPLACE(REPLACE(REPLACE(SKUMASTER.SKU_NAME, '/', ''), '-', ''), ' ', '') LIKE :kw3)";
+    $keyword_clean_nor = str_replace(['/', '-', ' ', 'r', 'R'], '', $keyword_input);
+    $where_conds[] = "(SKUMASTER.SKU_CODE LIKE :kw1 OR SKUMASTER.SKU_NAME LIKE :kw2 OR REPLACE(REPLACE(REPLACE(SKUMASTER.SKU_NAME, '/', ''), '-', ''), ' ', '') LIKE :kw3 OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(SKUMASTER.SKU_NAME), '/', ''), '-', ''), ' ', ''), 'R', '') LIKE :kw4)";
     $params[':kw1'] = '%' . $keyword_input . '%';
     $params[':kw2'] = '%' . $keyword_input . '%';
     $params[':kw3'] = '%' . $keyword_clean . '%';
+    $params[':kw4'] = '%' . $keyword_clean_nor . '%';
 }
 
 $where_sql = implode(" AND ", $where_conds);
