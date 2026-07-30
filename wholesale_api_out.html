@@ -585,7 +585,7 @@
             <h2 class="section-title">
                 <i class="fa-solid fa-diagram-project"></i> 2. ขั้นตอนและวิธีการพัฒนา (Implementation Steps)
             </h2>
-            <p>การพัฒนาไฟล์ API จะดำเนินการภายใต้ชื่อไฟล์ <code>api/v1/export_wholesale.php</code> โดยมีขั้นตอน 4 หลัก ดังนี้:</p>
+            <p>การพัฒนาไฟล์ API จะดำเนินการภายใต้ชื่อไฟล์ <code>api/v1/export_wholesale</code> โดยมีขั้นตอน 4 หลัก ดังนี้:</p>
 
             <div class="step-grid">
                 <div class="step-card">
@@ -608,7 +608,7 @@
                     <div class="step-number">3</div>
                     <div class="step-title">Database Query</div>
                     <div class="step-desc">
-                        ดึงข้อมูลจาก SQL Server ผ่าน PDO Prepared Statement โดยใช้เงื่อนไขจาก <code>cond_file/doc_info_wholesale.php</code>
+                        ดึงข้อมูลจาก SQL Server ผ่าน PDO Prepared Statement โดยใช้เงื่อนไขจาก <code>cond_file/doc_info_wholesale</code>
                     </div>
                 </div>
 
@@ -670,7 +670,7 @@
 
             <div class="endpoint-box">
                 <span class="method-post">POST</span>
-                <span class="endpoint-url">/api/v1/export_wholesale.php</span>
+                <span class="endpoint-url">/api/v1/export_wholesale</span>
             </div>
 
             <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 600;">Request Parameters (Body / Payload)</h3>
@@ -812,7 +812,7 @@
                         <span><i class="fa-solid fa-terminal"></i> cURL Command</span>
                         <button class="btn-copy" onclick="copyCode('curl-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
-                    <pre id="curl-code">curl -X POST "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php" \
+                    <pre id="curl-code">curl -X POST "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api" \
   -H "Content-Type: application/json" \
   -d '{
     "doc_date_start": "30-07-2026",
@@ -831,7 +831,7 @@
                         <button class="btn-copy" onclick="copyCode('js-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
                     <pre id="js-code">async function fetchWholesaleData() {
-  const url = 'http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php';
+  const url = 'http://61.7.142.26:8888/syy_data2/api/export_wholesale_api';
 
   const payload = {
     doc_date_start: '30-07-2026',
@@ -868,7 +868,7 @@
                     </div>
                     <pre id="python-code">import requests
 
-url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php"
+url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api"
 headers = {
     "Content-Type": "application/json"
 }
@@ -899,7 +899,7 @@ else:
                         <button class="btn-copy" onclick="copyCode('php-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
                     <pre id="php-code"><?php
-$url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php";
+$url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api";
 
 $payload = json_encode([
     "doc_date_start" => "30-07-2026",
