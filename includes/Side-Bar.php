@@ -86,10 +86,17 @@ include('config/lang.php');
                                         foreach ($result_subs as $result_sub) {
 
                                             $sub_menu = $_SESSION['lang'] == "th" ? $result_sub->label : $result_sub->label_en;
+                                            $target_attr = '';
+                                            if (!empty($result_sub->link_target) && $result_sub->link_target !== '_self') {
+                                                $target_val = trim($result_sub->link_target);
+                                                if ($target_val === 'blank' || $target_val === '_blank') {
+                                                    $target_val = '_blank';
+                                                }
+                                                $target_attr = ' target="' . htmlspecialchars($target_val) . '"';
+                                            }
                                             ?>
                                             <a class="collapse-item"
-                                               href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"
-                                                <?php if ($result_sub->link_target == "_blank") echo 'target="_blank"'; ?>>
+                                               href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"<?php echo $target_attr; ?>>
                                                 <?php echo "<i class='$result_sub->icon'></i>" ?>
                                                 <span><?php echo $sub_menu; ?></span>
                                             </a>
