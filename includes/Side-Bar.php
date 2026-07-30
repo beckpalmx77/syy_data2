@@ -88,7 +88,9 @@ include('config/lang.php');
                                             $sub_menu = $_SESSION['lang'] == "th" ? $result_sub->label : $result_sub->label_en;
                                             ?>
                                             <a class="collapse-item"
-                                               href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"><?php echo "<i class='$result_sub->icon'></i>" ?>
+                                               href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"
+                                                <?php if ($result_sub->link_target == "_blank") echo 'target="_blank"'; ?>>
+                                                <?php echo "<i class='$result_sub->icon'></i>" ?>
                                                 <span><?php echo $sub_menu; ?></span>
                                             </a>
                                         <?php }
