@@ -88,6 +88,9 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                                 <option value="Dashboard_sale">
                                                                                     Dashboard_sale
                                                                                 </option>
+                                                                                <option value="Dashboard_sale_user">
+                                                                                    Dashboard_sale_user
+                                                                                </option>
                                                                                 <option value="Dashboard_warehouse">
                                                                                     Dashboard_warehouse
                                                                                 </option>
