@@ -40,11 +40,77 @@ function format_date_sql($date_str) {
 $doc_date_start = format_date_sql($doc_date_start_input);
 $doc_date_to = format_date_sql($doc_date_to_input);
 
+// Parse salesman filter (single string, comma-separated string, or array)
+$slmn_input = $_REQUEST['slmn_name'] ?? $json_input['slmn_name'] ?? null;
+$slmn_list = [];
+if (!empty($slmn_input)) {
+    if (is_array($slmn_input)) {
+        foreach ($slmn_input as $item) {
+            $val = trim((string)$item);
+            if ($val !== '' && strtoupper($val) !== 'ALL') {
+                $slmn_list[] = $val;
+            }
+        }
+    } else {
+        $raw_list = explode(',', (string)$slmn_input);
+        foreach ($raw_list as $item) {
+            $val = trim((string)$item);
+            if ($val !== '' && strtoupper($val) !== 'ALL') {
+                $slmn_list[] = $val;
+            }
+        }
+    }
+}
+
+$sql_slmn_filter = "";
+if (!empty($slmn_list)) {
+    $slmn_conditions = [];
+    foreach ($slmn_list as $slmn_val) {
+        $escaped_val = str_replace("'", "''", $slmn_val);
+        $slmn_conditions[] = "(SALESMAN.SLMN_NAME LIKE '%" . $escaped_val . "%' OR SALESMAN.SLMN_CODE LIKE '%" . $escaped_val . "%')";
+    }
+    $sql_slmn_filter = " AND (" . implode(" OR ", $slmn_conditions) . ") ";
+}
+
+// Parse product category filter (single string, comma-separated string, or array)
+$iccat_input = $_REQUEST['iccat_code'] ?? $json_input['iccat_code'] ?? null;
+$iccat_list = [];
+if (!empty($iccat_input)) {
+    if (is_array($iccat_input)) {
+        foreach ($iccat_input as $item) {
+            $val = trim((string)$item);
+            if ($val !== '' && strtoupper($val) !== 'ALL') {
+                $iccat_list[] = $val;
+            }
+        }
+    } else {
+        $raw_list = explode(',', (string)$iccat_input);
+        foreach ($raw_list as $item) {
+            $val = trim((string)$item);
+            if ($val !== '' && strtoupper($val) !== 'ALL') {
+                $iccat_list[] = $val;
+            }
+        }
+    }
+}
+
+$sql_iccat_filter = "";
+if (!empty($iccat_list)) {
+    $iccat_conditions = [];
+    foreach ($iccat_list as $iccat_val) {
+        $escaped_val = str_replace("'", "''", $iccat_val);
+        $iccat_conditions[] = "(ICCAT.ICCAT_CODE LIKE '%" . $escaped_val . "%' OR ICCAT.ICCAT_NAME LIKE '%" . $escaped_val . "%')";
+    }
+    $sql_iccat_filter = " AND (" . implode(" OR ", $iccat_conditions) . ") ";
+}
+
 $table_filed_where = "DOCINFO.DI_DATE";
 
 $String_Sql = $select_query_sale
     . $sql_cond_sale
     . " AND " . $table_filed_where . " BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' "
+    . $sql_slmn_filter
+    . $sql_iccat_filter
     . $sql_order_sale;
 
 try {

@@ -1,14 +1,55 @@
 <?php
 include('includes/Header.php');
+include_once('config/connect_sqlserver.php');
+
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
 } else {
     $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : '';
     $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : '';
+
+    // Fetch Active Salesmen (SLMN_ENABLE = 'Y')
+    $salesmen_list = [];
+    try {
+        if (isset($conn_sqlsvr)) {
+            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
+            if ($stmt_slmn) {
+                $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+    } catch (Exception $e) {}
+
+    // Fetch Product Categories starting with/containing 'ยาง', 'น้ำมัน', 'กระทะล้อ'
+    $iccat_list_options = [];
+    try {
+        if (isset($conn_sqlsvr)) {
+            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT 
+                                 WHERE ICCAT_NAME LIKE 'ยาง%' 
+                                    OR ICCAT_NAME LIKE '%น้ำมัน%' 
+                                    OR ICCAT_NAME LIKE 'กระทะล้อ%' 
+                                    OR ICCAT_NAME LIKE '%กระทะ%'
+                                 ORDER BY ICCAT_CODE";
+            $stmt_iccat = $conn_sqlsvr->query($sql_iccat_select);
+            if ($stmt_iccat) {
+                $iccat_list_options = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+    } catch (Exception $e) {}
     ?>
 
     <!DOCTYPE html>
     <html lang="th">
+
+    <head>
+        <link href="js/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
+        <style>
+            .select2-container--default .select2-selection--multiple {
+                border-color: #d1d3e2;
+                min-height: 40px;
+                border-radius: 0.35rem;
+            }
+        </style>
+    </head>
 
     <body id="page-top">
     <div id="wrapper">
@@ -54,7 +95,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                             <div class="modal-body">
                                                                 <div class="form-group row">
 
-                                                                    <div class="col-sm-3">
+                                                                    <div class="col-sm-3 mb-3">
                                                                         <label for="doc_date_start"
                                                                                class="control-label">จากวันที่</label>
                                                                         <i class="fa fa-calendar"
@@ -67,7 +108,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                                placeholder="จากวันที่">
                                                                     </div>
 
-                                                                    <div class="col-sm-3">
+                                                                    <div class="col-sm-3 mb-3">
                                                                         <label for="doc_date_to"
                                                                                class="control-label">ถึงวันที่</label>
                                                                         <i class="fa fa-calendar"
@@ -78,6 +119,38 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                                required="required"
                                                                                readonly
                                                                                placeholder="ถึงวันที่">
+                                                                    </div>
+
+                                                                    <div class="col-sm-6 mb-3">
+                                                                        <label for="slmn_name"
+                                                                               class="control-label">ชื่อพนักงานขาย (SLMN_ENABLE = 'Y')</label>
+                                                                        <select class="form-control select2"
+                                                                                id="slmn_name"
+                                                                                name="slmn_name[]"
+                                                                                multiple="multiple"
+                                                                                data-placeholder="--- เลือกพนักงานขาย (เลือกได้หลายคน / ไม่เลือก = ทั้งหมด) ---">
+                                                                            <?php foreach ($salesmen_list as $slmn): ?>
+                                                                                <option value="<?php echo htmlspecialchars($slmn['SLMN_NAME']); ?>">
+                                                                                    <?php echo htmlspecialchars($slmn['SLMN_NAME'] . " (" . $slmn['SLMN_CODE'] . ")"); ?>
+                                                                                </option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="col-sm-12 mb-3">
+                                                                        <label for="iccat_code"
+                                                                               class="control-label">ประเภทสินค้า (ยาง / น้ำมันเครื่อง / กระทะล้อ)</label>
+                                                                        <select class="form-control select2"
+                                                                                id="iccat_code"
+                                                                                name="iccat_code[]"
+                                                                                multiple="multiple"
+                                                                                data-placeholder="--- เลือกประเภทสินค้า (เลือกได้หลายประเภท / ไม่เลือก = ทั้งหมด) ---">
+                                                                            <?php foreach ($iccat_list_options as $cat): ?>
+                                                                                <option value="<?php echo htmlspecialchars($cat['ICCAT_CODE']); ?>">
+                                                                                    <?php echo htmlspecialchars("[" . $cat['ICCAT_CODE'] . "] " . $cat['ICCAT_NAME']); ?>
+                                                                                </option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
                                                                     </div>
 
                                                                 </div>
@@ -97,14 +170,13 @@ if (strlen($_SESSION['alogin']) == "") {
 
                                                         </form>
 
-                                                        <div id="result"></div>
-
                                                     </div>
+
                                                 </div>
+
                                             </div>
-                                            <!-- /.col-md-8 col-md-offset-2 -->
+
                                         </div>
-                                        <!-- /.row -->
 
                                     </section>
 
@@ -140,7 +212,7 @@ if (strlen($_SESSION['alogin']) == "") {
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <!-- Select2 -->
-    <script src="vendor/select2/dist/js/select2.min.js"></script>
+    <script src="js/select2/dist/js/select2.min.js"></script>
     <!-- Bootstrap Datepicker -->
     <script src="vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
     <!-- Bootstrap Touchspin -->
@@ -160,6 +232,14 @@ if (strlen($_SESSION['alogin']) == "") {
 
     <script>
         $(document).ready(function () {
+            // Initialize Select2 dropdowns (default = ไม่เลือก / empty selection)
+            $('.select2').select2({
+                allowClear: true,
+                width: '100%'
+            });
+            $('#slmn_name').val(null).trigger('change');
+            $('#iccat_code').val(null).trigger('change');
+
             let today = new Date();
             let doc_date = getDay2Digits(today) + "-" + getMonth2Digits(today) + "-" + today.getFullYear();
             $('#doc_date_start').val(doc_date);

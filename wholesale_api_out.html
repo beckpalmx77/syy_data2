@@ -697,10 +697,16 @@
                         <td>วันที่สิ้นสุดในรูปแบบ <code>YYYY-MM-DD</code> หรือ <code>DD-MM-YYYY</code> (เช่น <code>2026-07-30</code>)</td>
                     </tr>
                     <tr>
-                        <td class="param-name">slmn_code</td>
-                        <td><span class="param-type">string</span></td>
+                        <td class="param-name">slmn_name</td>
+                        <td><span class="param-type">string | array</span></td>
                         <td><span>ไม่บังคับ</span></td>
-                        <td>กรองเฉพาะรหัสพนักงานขาย (ถ้าไม่ระบุจะดึงของทุกคน)</td>
+                        <td>ชื่อหรือรหัสพนักงานขาย (รองรับมากกว่า 1 คน โดยส่งเป็น Array เช่น <code>["ก้อย", "ตู่"]</code> หรือข้อความคั่นด้วย <code>,</code> เช่น <code>"ก้อย, ตู่"</code>)</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">iccat_code</td>
+                        <td><span class="param-type">string | array</span></td>
+                        <td><span>ไม่บังคับ</span></td>
+                        <td>รหัสหรือชื่อประเภทสินค้า (รองรับมากกว่า 1 ประเภท โดยส่งเป็น Array เช่น <code>["603", "101-BS01"]</code> หรือข้อความคั่นด้วย <code>,</code> เช่น <code>"603, 101-BS01"</code>)</td>
                     </tr>
                     <tr>
                         <td class="param-name">page</td>
@@ -724,7 +730,7 @@
                 <i class="fa-solid fa-brackets-curly"></i> 5. โครงสร้างตอบกลับ JSON (Response Spec)
             </h2>
 
-            <p>เมื่อเรียกใช้งานสำเร็จ ระบบจะส่งคืน HTTP Status Code <code>200 OK</code> พร้อมโครงสร้างข้อมูล JSON ดังนี้:</p>
+            <p>เมื่อเรียกใช้งานสำเร็จ ระบบจะส่งคืน HTTP Status Code <code>200 OK</code> พร้อมโครงสร้างข้อมูล JSON ครบทั้ง 16 ฟิลด์ ดังนี้:</p>
 
             <div class="code-container">
                 <div class="code-header">
@@ -735,43 +741,43 @@
   "status": "success",
   "code": 200,
   "message": "Data retrieved successfully",
-  "timestamp": "2026-07-30T12:12:00+07:00",
-  "pagination": {
-    "total_records": 2,
-    "current_page": 1,
-    "total_pages": 1,
-    "limit": 1000
-  },
+  "total_records": 2,
   "data": [
     {
-      "di_ref": "IV202607-001",
-      "di_date": "30/07/2026",
-      "ar_name": "คุณรัชดา ศรีกิ้ม",
-      "iccat_code": "603",
-      "iccat_name": "น้ำมัน - ยางเล็ก",
-      "sku_name": "*น้ำมันเกียร์ น้ำมันเฟืองท้าย คลาสตรอน GL5 80W-90เบอร์90",
-      "sku_e_name": "",
-      "brn_name": "ไม่กำหนดยี่ห้อ",
-      "trd_qty": 1.0,
-      "trd_q_free": 0.0,
-      "trd_b_amt": 590.00,
-      "slmn_code": "ตู่-AUTO",
-      "slmn_name": "พิศาล (ตู่)"
+      "DI_REF": "IV016907/102",
+      "DI_DATE": "30/07/2026",
+      "AR_NAME": "บริษัท สยามโกลบอลเฮ้าส์ จำกัด(มหาชน)",
+      "DEPT_CODE": "03",
+      "DEPT_THAIDESC": "ขายปลีก",
+      "ICCAT_CODE": "999-13",
+      "ICCAT_NAME": "ค่าบริการตั้งศูนย์-ยางเล็ก",
+      "SKU_NAME": "ค่าบริการเฉพาะตั้งศูนย์ขอบ 14-16 รถเล็ก",
+      "SKU_E_NAME": "",
+      "BRN_NAME": "ไม่กำหนดยี่ห้อ",
+      "TRD_QTY": 1,
+      "TRD_Q_FREE": 0,
+      "TRD_TDSC_KEYINV": 0,
+      "TRD_B_AMT": 500,
+      "SLMN_CODE": "1น๊อต",
+      "SLMN_NAME": "น๊อต-สำนักงานใหญ่"
     },
     {
-      "di_ref": "IV202607-002",
-      "di_date": "30/07/2026",
-      "ar_name": "คุณสมพล ดงฆา",
-      "iccat_code": "603",
-      "iccat_name": "น้ำมัน - ยางเล็ก",
-      "sku_name": "*น้ำมันทรานมิสชั่น เฟื่องท้าย GL-5 85W-140 เบอร์140",
-      "sku_e_name": "",
-      "brn_name": "ไม่กำหนดยี่ห้อ",
-      "trd_qty": 1.0,
-      "trd_q_free": 0.0,
-      "trd_b_amt": 590.00,
-      "slmn_code": "ตู่-AUTO",
-      "slmn_name": "พิศาล (ตู่)"
+      "DI_REF": "IS026907/001",
+      "DI_DATE": "30/07/2026",
+      "AR_NAME": "คุณสมพล ดงฆา",
+      "DEPT_CODE": "10",
+      "DEPT_THAIDESC": "ท่าแซะ",
+      "ICCAT_CODE": "603",
+      "ICCAT_NAME": "น้ำมัน - ยางเล็ก",
+      "SKU_NAME": "*น้ำมันรับคืน GL-5 85W-140 (ใบลดหนี้ IS)",
+      "SKU_E_NAME": "",
+      "BRN_NAME": "ไม่กำหนดยี่ห้อ",
+      "TRD_QTY": -1,
+      "TRD_Q_FREE": 0,
+      "TRD_TDSC_KEYINV": 0,
+      "TRD_B_AMT": -590,
+      "SLMN_CODE": "ตู่-AUTO",
+      "SLMN_NAME": "พิศาล (ตู่)"
     }
   ]
 }</pre>
@@ -806,14 +812,13 @@
                         <span><i class="fa-solid fa-terminal"></i> cURL Command</span>
                         <button class="btn-copy" onclick="copyCode('curl-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
-                    <pre id="curl-code">curl -X POST "https://your-domain.com/api/v1/export_wholesale.php" \
+                    <pre id="curl-code">curl -X POST "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php" \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: syy_live_secret_key_2026_x89a" \
   -d '{
-    "doc_date_start": "2026-07-01",
-    "doc_date_to": "2026-07-30",
-    "page": 1,
-    "limit": 100
+    "doc_date_start": "30-07-2026",
+    "doc_date_to": "30-07-2026",
+    "slmn_name": ["ก้อย", "น๊อต"],
+    "iccat_code": ["603", "101-BS01"]
   }'</pre>
                 </div>
             </div>
@@ -826,22 +831,20 @@
                         <button class="btn-copy" onclick="copyCode('js-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
                     <pre id="js-code">async function fetchWholesaleData() {
-  const url = 'https://your-domain.com/api/v1/export_wholesale.php';
-  const apiKey = 'syy_live_secret_key_2026_x89a';
+  const url = 'http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php';
 
   const payload = {
-    doc_date_start: '2026-07-01',
-    doc_date_to: '2026-07-30',
-    page: 1,
-    limit: 100
+    doc_date_start: '30-07-2026',
+    doc_date_to: '30-07-2026',
+    slmn_name: ['ก้อย', 'น๊อต'],
+    iccat_code: ['603', '101-BS01']
   };
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': apiKey
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
@@ -865,25 +868,24 @@
                     </div>
                     <pre id="python-code">import requests
 
-url = "https://your-domain.com/api/v1/export_wholesale.php"
+url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php"
 headers = {
-    "Content-Type": "application/json",
-    "X-API-KEY": "syy_live_secret_key_2026_x89a"
+    "Content-Type": "application/json"
 }
 payload = {
-    "doc_date_start": "2026-07-01",
-    "doc_date_to": "2026-07-30",
-    "page": 1,
-    "limit": 100
+    "doc_date_start": "30-07-2026",
+    "doc_date_to": "30-07-2026",
+    "slmn_name": ["ก้อย", "น๊อต"],
+    "iccat_code": ["603", "101-BS01"]
 }
 
 response = requests.post(url, json=payload, headers=headers)
 data = response.json()
 
 if data.get("status") == "success":
-    print(f"Total Records: {data['pagination']['total_records']}")
+    print(f"Total Records: {data['total_records']}")
     for item in data["data"]:
-        print(item["di_ref"], item["ar_name"], item["trd_b_amt"])
+        print(item["DI_REF"], item["AR_NAME"], item["DEPT_THAIDESC"], item["TRD_B_AMT"])
 else:
     print("API Error:", data.get("message"))</pre>
                 </div>
@@ -897,14 +899,13 @@ else:
                         <button class="btn-copy" onclick="copyCode('php-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
                     </div>
                     <pre id="php-code"><?php
-$url = "https://your-domain.com/api/v1/export_wholesale.php";
-$apiKey = "syy_live_secret_key_2026_x89a";
+$url = "http://61.7.142.26:8888/syy_data2/api/export_wholesale_api.php";
 
 $payload = json_encode([
-    "doc_date_start" => "2026-07-01",
-    "doc_date_to" => "2026-07-30",
-    "page" => 1,
-    "limit" => 100
+    "doc_date_start" => "30-07-2026",
+    "doc_date_to" => "30-07-2026",
+    "slmn_name" => ["ก้อย", "น๊อต"],
+    "iccat_code" => ["603", "101-BS01"]
 ]);
 
 $ch = curl_init($url);
@@ -912,8 +913,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json",
-    "X-API-KEY: " . $apiKey
+    "Content-Type: application/json"
 ]);
 
 $response = curl_exec($ch);
