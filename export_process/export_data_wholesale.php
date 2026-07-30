@@ -22,7 +22,7 @@ $String_Sql = $select_query_sale
     . " AND " . $table_filed_where . " BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' "
     . $sql_order_sale;
 
-$data = "DI_REF,DI_DATE,AR_NAME,DEPT_CODE,DEPT_THAIDESC,ICCAT_CODE,ICCAT_NAME,SKU_NAME,SKU_E_NAME,BRN_NAME,TRD_QTY,TRD_Q_FREE,TRD_B_AMT,SLMN_CODE,SLMN_NAME\n";
+$data = "DI_REF,DI_DATE,AR_NAME,DEPT_CODE,DEPT_THAIDESC,ICCAT_CODE,ICCAT_NAME,SKU_NAME,SKU_E_NAME,BRN_NAME,TRD_QTY,TRD_Q_FREE,TRD_TDSC_KEYINV,TRD_B_AMT,SLMN_CODE,SLMN_NAME\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
@@ -37,6 +37,7 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
 
     $trd_qty = (float)($row['TRD_QTY'] ?? 0);
     $trd_q_free = (float)($row['TRD_Q_FREE'] ?? 0);
+    $trd_tdsc_keyinv = (float)($row['TRD_TDSC_KEYINV'] ?? 0);
     $trd_b_amt = (float)($row['TRD_B_AMT'] ?? 0);
 
     if ($is_minus_doc) {
@@ -45,6 +46,9 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
         }
         if ($trd_q_free > 0) {
             $trd_q_free = -$trd_q_free;
+        }
+        if ($trd_tdsc_keyinv > 0) {
+            $trd_tdsc_keyinv = -$trd_tdsc_keyinv;
         }
         if ($trd_b_amt > 0) {
             $trd_b_amt = -$trd_b_amt;
@@ -64,6 +68,7 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
         $clean_str($row['BRN_NAME'] ?? ''),
         $clean_str($trd_qty),
         $clean_str($trd_q_free),
+        $clean_str($trd_tdsc_keyinv),
         $clean_str($trd_b_amt),
         $clean_str($row['SLMN_CODE'] ?? ''),
         $clean_str($row['SLMN_NAME'] ?? '')

@@ -58,6 +58,7 @@ try {
 
         $trd_qty = (float)($row['TRD_QTY'] ?? 0);
         $trd_q_free = (float)($row['TRD_Q_FREE'] ?? 0);
+        $trd_tdsc_keyinv = (float)($row['TRD_TDSC_KEYINV'] ?? 0);
         $trd_b_amt = (float)($row['TRD_B_AMT'] ?? 0);
 
         if ($is_minus_doc) {
@@ -67,27 +68,31 @@ try {
             if ($trd_q_free > 0) {
                 $trd_q_free = -$trd_q_free;
             }
+            if ($trd_tdsc_keyinv > 0) {
+                $trd_tdsc_keyinv = -$trd_tdsc_keyinv;
+            }
             if ($trd_b_amt > 0) {
                 $trd_b_amt = -$trd_b_amt;
             }
         }
 
         $result_data[] = [
-            "DI_REF"        => (string)($row['DI_REF'] ?? ''),
-            "DI_DATE"       => (string)($row['DI_DATE'] ?? ''),
-            "AR_NAME"       => (string)($row['AR_NAME'] ?? ''),
-            "DEPT_CODE"     => (string)($row['DEPT_CODE'] ?? ''),
-            "DEPT_THAIDESC" => (string)($row['DEPT_THAIDESC'] ?? ''),
-            "ICCAT_CODE"    => (string)($row['ICCAT_CODE'] ?? ''),
-            "ICCAT_NAME"    => (string)($row['ICCAT_NAME'] ?? ''),
-            "SKU_NAME"      => (string)($row['SKU_NAME'] ?? ''),
-            "SKU_E_NAME"    => (string)($row['SKU_E_NAME'] ?? ''),
-            "BRN_NAME"      => (string)($row['BRN_NAME'] ?? ''),
-            "TRD_QTY"       => $trd_qty,
-            "TRD_Q_FREE"    => $trd_q_free,
-            "TRD_B_AMT"     => $trd_b_amt,
-            "SLMN_CODE"     => (string)($row['SLMN_CODE'] ?? ''),
-            "SLMN_NAME"     => (string)($row['SLMN_NAME'] ?? '')
+            "DI_REF"          => (string)($row['DI_REF'] ?? ''),
+            "DI_DATE"         => (string)($row['DI_DATE'] ?? ''),
+            "AR_NAME"         => (string)($row['AR_NAME'] ?? ''),
+            "DEPT_CODE"       => (string)($row['DEPT_CODE'] ?? ''),
+            "DEPT_THAIDESC"   => (string)($row['DEPT_THAIDESC'] ?? ''),
+            "ICCAT_CODE"      => (string)($row['ICCAT_CODE'] ?? ''),
+            "ICCAT_NAME"      => (string)($row['ICCAT_NAME'] ?? ''),
+            "SKU_NAME"        => (string)($row['SKU_NAME'] ?? ''),
+            "SKU_E_NAME"      => (string)($row['SKU_E_NAME'] ?? ''),
+            "BRN_NAME"        => (string)($row['BRN_NAME'] ?? ''),
+            "TRD_QTY"         => $trd_qty,
+            "TRD_Q_FREE"      => $trd_q_free,
+            "TRD_TDSC_KEYINV" => $trd_tdsc_keyinv,
+            "TRD_B_AMT"       => $trd_b_amt,
+            "SLMN_CODE"       => (string)($row['SLMN_CODE'] ?? ''),
+            "SLMN_NAME"       => (string)($row['SLMN_NAME'] ?? '')
         ];
     }
 
