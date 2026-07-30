@@ -7,7 +7,7 @@ $filename = "Data_Wholesale-" . date('Y-m-d_H-i-s') . ".csv";
 @header("Content-Disposition: attachment; filename=" . $filename);
 
 include('../config/connect_sqlserver.php');
-include('../cond_file/doc_info_wholesale.php');
+include('../cond_file/doc_info_manage_wholesale.php');
 
 $table_filed_where = "DOCINFO.DI_DATE";
 

@@ -323,7 +323,7 @@ if (strlen($_SESSION['alogin']) == "") {
                 processing: true,
                 serverSide: false,
                 ajax: {
-                    url: 'api/export_wholesale_api.php',
+                    url: 'api/manage_wholesale_document_api.php',
                     type: 'POST',
                     contentType: 'application/json',
                     data: function (d) {
