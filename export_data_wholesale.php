@@ -3,6 +3,8 @@ include('includes/Header.php');
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
 } else {
+    $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : '';
+    $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : '';
     ?>
 
     <!DOCTYPE html>
@@ -23,13 +25,13 @@ if (strlen($_SESSION['alogin']) == "") {
                 <!-- Container Fluid-->
                 <div class="container-fluid" id="container-wrapper">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800"><?php echo urldecode($_GET['s']) ?></h1>
+                        <h1 class="h3 mb-0 text-gray-800"><?php echo $sub_title; ?></h1>
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="<?php echo $_SESSION['dashboard_page'] ?>">Home</a>
+                            <li class="breadcrumb-item"><a href="<?php echo $_SESSION['dashboard_page']; ?>">Home</a>
                             </li>
-                            <li class="breadcrumb-item"><?php echo urldecode($_GET['m']) ?></li>
+                            <li class="breadcrumb-item"><?php echo $menu_title; ?></li>
                             <li class="breadcrumb-item active"
-                                aria-current="page"><?php echo urldecode($_GET['s']) ?></li>
+                                aria-current="page"><?php echo $sub_title; ?></li>
                         </ol>
                     </div>
 
@@ -50,42 +52,36 @@ if (strlen($_SESSION['alogin']) == "") {
                                                               enctype="multipart/form-data">
 
                                                             <div class="modal-body">
+                                                                <div class="form-group row">
 
-                                                                <div class="modal-body">
-                                                                    <div class="form-group row">
-
-                                                                        <div class="col-sm-3">
-                                                                            <label for="doc_date_start"
-                                                                                   class="control-label">จากวันที่</label>
-                                                                            <i class="fa fa-calendar"
-                                                                               aria-hidden="true"></i>
-                                                                            <input type="text" class="form-control"
-                                                                                   id="doc_date_start"
-                                                                                   name="doc_date_start"
-                                                                                   required="required"
-                                                                                   readonly="true"
-                                                                                   placeholder="จากวันที่">
-                                                                        </div>
-
-                                                                        <div class="col-sm-3">
-                                                                            <label for="doc_date_to"
-                                                                                   class="control-label">ถึงวันที่</label>
-                                                                            <i class="fa fa-calendar"
-                                                                               aria-hidden="true"></i>
-                                                                            <input type="text" class="form-control"
-                                                                                   id="doc_date_to"
-                                                                                   name="doc_date_to"
-                                                                                   required="required"
-                                                                                   readonly="true"
-                                                                                   placeholder="ถึงวันที่">
-                                                                        </div>
-
-
+                                                                    <div class="col-sm-3">
+                                                                        <label for="doc_date_start"
+                                                                               class="control-label">จากวันที่</label>
+                                                                        <i class="fa fa-calendar"
+                                                                           aria-hidden="true"></i>
+                                                                        <input type="text" class="form-control"
+                                                                               id="doc_date_start"
+                                                                               name="doc_date_start"
+                                                                               required="required"
+                                                                               readonly
+                                                                               placeholder="จากวันที่">
                                                                     </div>
+
+                                                                    <div class="col-sm-3">
+                                                                        <label for="doc_date_to"
+                                                                               class="control-label">ถึงวันที่</label>
+                                                                        <i class="fa fa-calendar"
+                                                                           aria-hidden="true"></i>
+                                                                        <input type="text" class="form-control"
+                                                                               id="doc_date_to"
+                                                                               name="doc_date_to"
+                                                                               required="required"
+                                                                               readonly
+                                                                               placeholder="ถึงวันที่">
+                                                                    </div>
+
                                                                 </div>
-
-
-                                                             </div>
+                                                            </div>
 
                                                             <div class="modal-footer">
                                                                 <input type="hidden" name="id" id="id"/>
@@ -97,15 +93,9 @@ if (strlen($_SESSION['alogin']) == "") {
                                                                         id="btnExport"> Export <i
                                                                             class="fa fa-check"></i>
                                                                 </button>
-                                                                <!--button type="button" class="btn btn-danger"
-                                                                        id="btnClose">Close <i
-                                                                            class="fa fa-times"></i>
-                                                                </button-->
                                                             </div>
 
-
                                                         </form>
-
 
                                                         <div id="result"></div>
 
@@ -118,7 +108,6 @@ if (strlen($_SESSION['alogin']) == "") {
 
                                     </section>
 
-
                                 </div>
 
                             </div>
@@ -127,8 +116,6 @@ if (strlen($_SESSION['alogin']) == "") {
 
                     </div>
                     <!--Row-->
-
-                    <!-- Row -->
 
                 </div>
 
@@ -166,11 +153,9 @@ if (strlen($_SESSION['alogin']) == "") {
 
     <script src="vendor/date-picker-1.9/js/bootstrap-datepicker.js"></script>
     <script src="vendor/date-picker-1.9/locales/bootstrap-datepicker.th.min.js"></script>
-    <!--link href="vendor/date-picker-1.9/css/date_picker_style.css" rel="stylesheet"/-->
     <link href="vendor/date-picker-1.9/css/bootstrap-datepicker.css" rel="stylesheet"/>
 
     <script src="js/MyFrameWork/framework_util.js"></script>
-
     <script src="js/util.js"></script>
 
     <script>
@@ -179,22 +164,14 @@ if (strlen($_SESSION['alogin']) == "") {
             let doc_date = getDay2Digits(today) + "-" + getMonth2Digits(today) + "-" + today.getFullYear();
             $('#doc_date_start').val(doc_date);
             $('#doc_date_to').val(doc_date);
-        });
-    </script>
 
-    <script>
-        $(document).ready(function () {
             $('#doc_date_start').datepicker({
                 format: "dd-mm-yyyy",
                 todayHighlight: true,
                 language: "th",
                 autoclose: true
             });
-        });
-    </script>
 
-    <script>
-        $(document).ready(function () {
             $('#doc_date_to').datepicker({
                 format: "dd-mm-yyyy",
                 todayHighlight: true,
