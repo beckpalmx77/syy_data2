@@ -277,7 +277,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-hover align-items-center" id="salesSummaryTable">
+                                        <table class="table table-bordered table-hover text-nowrap align-items-center" id="salesSummaryTable">
                                             <thead class="thead-light">
                                                 <tr>
                                                     <th class="text-center" style="width: 60px;">ลำดับ</th>
