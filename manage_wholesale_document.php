@@ -53,14 +53,18 @@ if (strlen($_SESSION['alogin']) == "") {
                 border-radius: 0.35rem;
             }
             .table-responsive {
-                overflow-x: auto;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            table.dataTable,
+            table.dataTable th,
+            table.dataTable td,
+            table.dataTable tfoot th {
+                white-space: nowrap !important;
+                vertical-align: middle;
             }
             table.dataTable thead th {
-                white-space: nowrap;
                 background-color: #f8f9fc;
-            }
-            table.dataTable tbody td {
-                vertical-align: middle;
             }
             .badge-return {
                 background-color: #e74a3b;
@@ -168,7 +172,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                 <div class="card-body">
                                     <div class="col-md-12 col-md-offset-2">
                                         <div class="table-responsive">
-                                            <table id="TableRecordList" class="display dataTable table table-bordered table-hover w-100">
+                                            <table id="TableRecordList" class="display dataTable table table-bordered table-hover text-nowrap w-100">
                                                 <thead>
                                                     <tr>
                                                         <th class="text-center">#</th>
