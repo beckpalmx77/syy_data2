@@ -12,11 +12,11 @@ v_sale_payment.*
 ,ARCONDITION.ARCD_TERM
 ,FORMAT(DUE_DATE, 'dd/MM/yyyy ') AS DUE_DATE_REF
 ,FORMAT(BUY_DATE, 'dd/MM/yyyy ') AS BUY_DATE_REF
-from v_sale_payment 
-left join ARPAYMENT on ARPAYMENT.ARP_ARD=v_sale_payment.ARD_KEY
-left join DOCINFO DOC2 on DOC2.DI_KEY=   ARPAYMENT.ARP_DI
-left join CHEQUEIN on CHEQUEIN.CQIN_DI = DOC2.DI_KEY  
-left join BANKFILE on BANKFILE.BANK_KEY = CHEQUEIN.CQIN_BANK 
-left join ARCONDITION on ARCONDITION.ARCD_KEY = v_sale_payment.ARD_ARCD ";
+from v_sale_payment WITH (NOLOCK)
+left join ARPAYMENT WITH (NOLOCK) on ARPAYMENT.ARP_ARD=v_sale_payment.ARD_KEY
+left join DOCINFO DOC2 WITH (NOLOCK) on DOC2.DI_KEY=   ARPAYMENT.ARP_DI
+left join CHEQUEIN WITH (NOLOCK) on CHEQUEIN.CQIN_DI = DOC2.DI_KEY  
+left join BANKFILE WITH (NOLOCK) on BANKFILE.BANK_KEY = CHEQUEIN.CQIN_BANK 
+left join ARCONDITION WITH (NOLOCK) on ARCONDITION.ARCD_KEY = v_sale_payment.ARD_ARCD ";
 
 $select_query_daily_order = " order by DI_KEY1, BUY_DATE  ";

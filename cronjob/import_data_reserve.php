@@ -12,50 +12,52 @@ $doc_id_prefix = 'BKSV%';
 $year = date("Y");
 $month = date("m");
 
-echo "Year = " . $year ; echo "\n\r"; echo "Month = " . $month ; echo "\n\r";
+echo "Year = " . $year . "\n\r";
+echo "Month = " . $month . "\n\r";
 
 $sql_sqlsvr = $select_query . $sql_cond . " AND DI_REF like '" . $doc_id_prefix . "'"
             . " AND YEAR(DI_DATE) = " . $year
             . " AND MONTH(DI_DATE) = " . $month
             . $sql_order ;
 
-//$myfile = fopen("qry_file1.txt", "w") or die("Unable to open file!");
-//fwrite($myfile, $sql_sqlsvr);
-//fclose($myfile);
-
 $stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
 $stmt_sqlsvr->execute();
 
-while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
+$sql_find = "SELECT COUNT(*) FROM ims_price_approve_header WHERE DI_KEY = :DI_KEY";
+$stmt_find = $conn->prepare($sql_find);
 
-    $sql_find = "SELECT * FROM ims_price_approve_header WHERE DI_KEY = '" . $result_sqlsvr["DI_KEY"] . "'";
-    $nRows = $conn->query($sql_find)->fetchColumn();
-    if ($nRows > 0) {
-        echo "Dup";
-    } else {
+$sql_insert = "INSERT INTO ims_price_approve_header(DI_KEY,doc_no,doc_date,customer_id,customer_name) VALUES (:DI_KEY,:doc_no,:doc_date,:customer_id,:customer_name)";
+$stmt_insert = $conn->prepare($sql_insert);
 
+$insert_count = 0;
+$dup_count = 0;
 
-        $doc_date = substr($result_sqlsvr["DI_DATE"],8,2) . "/" . substr($result_sqlsvr["DI_DATE"],5,2) . "/" . strval(intval(substr($result_sqlsvr["DI_DATE"],0,4))+543);
-        //echo $doc_date . " | " ;
+$conn->beginTransaction();
+try {
+    while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
+        $stmt_find->execute([':DI_KEY' => $result_sqlsvr["DI_KEY"]]);
+        $nRows = $stmt_find->fetchColumn();
 
-        $sql = "INSERT INTO ims_price_approve_header(DI_KEY,doc_no,doc_date,customer_id,customer_name) VALUES (:DI_KEY,:doc_no,:doc_date,:customer_id,:customer_name)";
-        $query = $conn->prepare($sql);
-        $query->bindParam(':DI_KEY', $result_sqlsvr["DI_KEY"], PDO::PARAM_STR);
-        $query->bindParam(':doc_no', $result_sqlsvr["DI_REF"], PDO::PARAM_STR);
-        $query->bindParam(':doc_date', $doc_date, PDO::PARAM_STR);
-        $query->bindParam(':customer_id', $result_sqlsvr["AR_CODE"], PDO::PARAM_STR);
-        $query->bindParam(':customer_name', $result_sqlsvr["AR_NAME"], PDO::PARAM_STR);
-        $query->execute();
-
-        $lastInsertId = $conn->lastInsertId();
-
-        if ($lastInsertId) {
-            echo "Save OK";
+        if ($nRows > 0) {
+            $dup_count++;
         } else {
-            echo "Error";
-        }
+            $doc_date = substr($result_sqlsvr["DI_DATE"],8,2) . "/" . substr($result_sqlsvr["DI_DATE"],5,2) . "/" . strval(intval(substr($result_sqlsvr["DI_DATE"],0,4))+543);
 
+            $stmt_insert->execute([
+                ':DI_KEY' => $result_sqlsvr["DI_KEY"],
+                ':doc_no' => $result_sqlsvr["DI_REF"],
+                ':doc_date' => $doc_date,
+                ':customer_id' => $result_sqlsvr["AR_CODE"],
+                ':customer_name' => $result_sqlsvr["AR_NAME"]
+            ]);
+            $insert_count++;
+        }
     }
+    $conn->commit();
+    echo "Import reserve completed. Inserted: $insert_count, Duplicates: $dup_count\n\r";
+} catch (Exception $e) {
+    $conn->rollBack();
+    echo "Error: " . $e->getMessage();
 }
 
 $conn_sqlsvr=null;

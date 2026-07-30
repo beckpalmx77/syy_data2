@@ -58,116 +58,86 @@ $sql_query_data = " SELECT
  ARDETAIL.ARD_BILL_DI
  
 FROM
- DOCINFO 
- JOIN DOCTYPE ON DI_DT = DT_KEY
- JOIN TRANPAYH ON DI_KEY = TPH_DI
- JOIN TRANPAYA ON TPH_KEY = TPA_TPH
- JOIN ARDETAIL ON TPA_REFER_ARPD = ARD_KEY
- JOIN ARFILE ON TPH_AR = AR_KEY
- JOIN ARCAT ON AR_ARCAT = ARCAT_KEY
+ DOCINFO WITH (NOLOCK) 
+ JOIN DOCTYPE WITH (NOLOCK) ON DI_DT = DT_KEY
+ JOIN TRANPAYH WITH (NOLOCK) ON DI_KEY = TPH_DI
+ JOIN TRANPAYA WITH (NOLOCK) ON TPH_KEY = TPA_TPH
+ JOIN ARDETAIL WITH (NOLOCK) ON TPA_REFER_ARPD = ARD_KEY
+ JOIN ARFILE WITH (NOLOCK) ON TPH_AR = AR_KEY
+ JOIN ARCAT WITH (NOLOCK) ON AR_ARCAT = ARCAT_KEY
 
 WHERE
  (DOCTYPE.DT_PROPERTIES = '406') AND
  (DOCINFO.DI_ACTIVE = 0) ";
 
-$order_by = "
-ORDER BY DOCINFO.DI_DATE ASC, DOCINFO.DI_REF ASC ";
+$order_by = " ORDER BY DOCINFO.DI_DATE ASC, DOCINFO.DI_REF ASC ";
 
-
-echo "Today is " . date("Y/m/d");
-echo "\n\r" . date("Y/m/d", strtotime("yesterday"));
-
-//$select_query_daily_cond = " AND DOCINFO.DI_DATE BETWEEN '2023/01/01' AND '" . date("Y/m/d") . "'";
+echo "Today is " . date("Y/m/d") . "\n\r";
+echo date("Y/m/d", strtotime("yesterday")) . "\n\r";
 
 $select_query_daily_cond = " AND DOCINFO.DI_DATE BETWEEN '" . date("Y/m/d", strtotime("yesterday")) . "' AND '" . date("Y/m/d") . "'";
 
 $sql_sqlsvr = $sql_query_data . $select_query_daily_cond . $order_by ;
 
-/*
-$myfile = fopen("qry_file_mssql_server.txt", "w") or die("Unable to open file!");
-fwrite($myfile, $sql_sqlsvr);
-fclose($myfile);
-*/
-
-/*
- select * from ims_product_sale_sac
-    order by
-        STR_TO_DATE(DI_DATE, '%m/%d/%Y') desc
- */
-
-$insert_data = "";
-$update_data = "";
-
-$res = "";
-
 $stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
 $stmt_sqlsvr->execute();
 
-$return_arr = array();
+$sql_find = "SELECT COUNT(*) FROM ims_document_bill_load WHERE DI_REF = :DI_REF";
+$stmt_find = $conn->prepare($sql_find);
 
-while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
+$sql_update = "UPDATE ims_document_bill_load SET TPA_REFER_REF=:TPA_REFER_REF,TPA_REFER_DATE=:TPA_REFER_DATE,DI_ACTIVE=:DI_ACTIVE,
+ARD_A_SV=:ARD_A_SV,ARD_A_VAT=:ARD_A_VAT,ARD_A_AMT=:ARD_A_AMT WHERE DI_REF = :DI_REF";
+$stmt_update = $conn->prepare($sql_update);
 
-    $sql_find = "SELECT * FROM ims_document_bill_load "
-        . " WHERE DI_REF = '" . $result_sqlsvr["DI_REF"]  . "'";
+$sql_insert = "INSERT INTO ims_document_bill_load (DI_REF,DI_DATE,TPA_REFER_REF,TPA_REFER_DATE,AR_CODE,AR_NAME
+,ARD_BIL_DA,ARD_DUE_DA,ARD_A_SV,ARD_A_VAT,ARD_A_AMT,DI_ACTIVE)
+VALUES (:DI_REF,:DI_DATE,:TPA_REFER_REF,:TPA_REFER_DATE,:AR_CODE,:AR_NAME
+,:ARD_BIL_DA,:ARD_DUE_DA,:ARD_A_SV,:ARD_A_VAT,:ARD_A_AMT,:DI_ACTIVE)";
+$stmt_insert = $conn->prepare($sql_insert);
 
-    //echo $sql_find . "\n\r";
+$update_count = 0;
+$insert_count = 0;
 
-    $nRows = $conn->query($sql_find)->fetchColumn();
-    if ($nRows > 0) {
+$conn->beginTransaction();
+try {
+    while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
+        $stmt_find->execute([':DI_REF' => $result_sqlsvr["DI_REF"]]);
+        $nRows = $stmt_find->fetchColumn();
 
-        $sql_update = " UPDATE ims_document_bill_load  SET TPA_REFER_REF=:TPA_REFER_REF,TPA_REFER_DATE=:TPA_REFER_DATE,DI_ACTIVE=:DI_ACTIVE,
-        ARD_A_SV=:ARD_A_SV,ARD_A_VAT=:ARD_A_VAT,ARD_A_AMT=:ARD_A_AMT   
-        WHERE DI_REF  = :DI_REF ";
-
-        $query = $conn->prepare($sql_update);
-        $query->bindParam(':TPA_REFER_REF', $result_sqlsvr["TPA_REFER_REF"], PDO::PARAM_STR);
-        $query->bindParam(':TPA_REFER_DATE', $result_sqlsvr["TPA_REFER_DATE"], PDO::PARAM_STR);
-        $query->bindParam(':DI_ACTIVE', $result_sqlsvr["DI_ACTIVE"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_SV', $result_sqlsvr["ARD_A_SV"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_VAT', $result_sqlsvr["ARD_A_VAT"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_AMT', $result_sqlsvr["ARD_A_AMT"], PDO::PARAM_STR);
-        $query->bindParam(':DI_REF', $result_sqlsvr["DI_REF"], PDO::PARAM_STR);
-        $query->execute();
-
-        $update_data = $result_sqlsvr["DI_DATE"] . " : " . $result_sqlsvr["DI_REF"] . " | " . $result_sqlsvr["AR_NAME"] . " | " .  $result_sqlsvr["DI_ACTIVE"] . "\n\r";
-
-        echo "UPDATE DATA " . $update_data;
-
-        //$myfile = fopen("update_chk.txt", "w") or die("Unable to open file!");
-        //fwrite($myfile, $update_data);
-        //fclose($myfile);
-
-    } else {
-
-        $sql = " INSERT INTO ims_document_bill_load (DI_REF,DI_DATE,TPA_REFER_REF,TPA_REFER_DATE,AR_CODE,AR_NAME
-                 ,ARD_BIL_DA,ARD_DUE_DA,ARD_A_SV,ARD_A_VAT,ARD_A_AMT,DI_ACTIVE)
-                 VALUES (:DI_REF,:DI_DATE,:TPA_REFER_REF,:TPA_REFER_DATE,:AR_CODE,:AR_NAME
-                 ,:ARD_BIL_DA,:ARD_DUE_DA,:ARD_A_SV,:ARD_A_VAT,:ARD_A_AMT,:DI_ACTIVE) ";
-        $query = $conn->prepare($sql);
-        $query->bindParam(':DI_REF', $result_sqlsvr["DI_REF"], PDO::PARAM_STR);
-        $query->bindParam(':DI_DATE', $result_sqlsvr["DI_DATE"], PDO::PARAM_STR);
-        $query->bindParam(':TPA_REFER_REF', $result_sqlsvr["TPA_REFER_REF"], PDO::PARAM_STR);
-        $query->bindParam(':TPA_REFER_DATE', $result_sqlsvr["TPA_REFER_DATE"], PDO::PARAM_STR);
-        $query->bindParam(':AR_CODE', $result_sqlsvr["AR_CODE"], PDO::PARAM_STR);
-        $query->bindParam(':AR_NAME', $result_sqlsvr["AR_NAME"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_BIL_DA', $result_sqlsvr["ARD_BIL_DA"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_DUE_DA', $result_sqlsvr["ARD_DUE_DA"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_SV', $result_sqlsvr["ARD_A_SV"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_VAT', $result_sqlsvr["ARD_A_VAT"], PDO::PARAM_STR);
-        $query->bindParam(':ARD_A_AMT', $result_sqlsvr["ARD_A_AMT"], PDO::PARAM_STR);
-        $query->bindParam(':DI_ACTIVE', $result_sqlsvr["DI_ACTIVE"], PDO::PARAM_STR);
-        $query->execute();
-        $lastInsertId = $conn->lastInsertId();
-        if ($lastInsertId) {
-            $insert_data = $result_sqlsvr["DI_DATE"] . " : " . $result_sqlsvr["DI_REF"] . " | " . $result_sqlsvr["AR_NAME"] . " | " .  $result_sqlsvr["DI_ACTIVE"] . "\n\r";
-            echo "INSERT DATA " . $insert_data;
+        if ($nRows > 0) {
+            $stmt_update->execute([
+                ':TPA_REFER_REF' => $result_sqlsvr["TPA_REFER_REF"],
+                ':TPA_REFER_DATE' => $result_sqlsvr["TPA_REFER_DATE"],
+                ':DI_ACTIVE' => $result_sqlsvr["DI_ACTIVE"],
+                ':ARD_A_SV' => $result_sqlsvr["ARD_A_SV"],
+                ':ARD_A_VAT' => $result_sqlsvr["ARD_A_VAT"],
+                ':ARD_A_AMT' => $result_sqlsvr["ARD_A_AMT"],
+                ':DI_REF' => $result_sqlsvr["DI_REF"]
+            ]);
+            $update_count++;
         } else {
-            echo " Error ";
+            $stmt_insert->execute([
+                ':DI_REF' => $result_sqlsvr["DI_REF"],
+                ':DI_DATE' => $result_sqlsvr["DI_DATE"],
+                ':TPA_REFER_REF' => $result_sqlsvr["TPA_REFER_REF"],
+                ':TPA_REFER_DATE' => $result_sqlsvr["TPA_REFER_DATE"],
+                ':AR_CODE' => $result_sqlsvr["AR_CODE"],
+                ':AR_NAME' => $result_sqlsvr["AR_NAME"],
+                ':ARD_BIL_DA' => $result_sqlsvr["ARD_BIL_DA"],
+                ':ARD_DUE_DA' => $result_sqlsvr["ARD_DUE_DA"],
+                ':ARD_A_SV' => $result_sqlsvr["ARD_A_SV"],
+                ':ARD_A_VAT' => $result_sqlsvr["ARD_A_VAT"],
+                ':ARD_A_AMT' => $result_sqlsvr["ARD_A_AMT"],
+                ':DI_ACTIVE' => $result_sqlsvr["DI_ACTIVE"]
+            ]);
+            $insert_count++;
         }
-
-
     }
-
+    $conn->commit();
+    echo "Import bill load completed. Updated: $update_count, Inserted: $insert_count\n\r";
+} catch (Exception $e) {
+    $conn->rollBack();
+    echo "Error: " . $e->getMessage();
 }
 
 $conn_sqlsvr = null;

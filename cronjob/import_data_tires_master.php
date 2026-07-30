@@ -3,66 +3,64 @@
 ini_set('display_errors', 1);
 error_reporting(~0);
 
-include ("../config/connect_sqlserver.php");
-include ("../config/connect_db.php");
+include("../config/connect_sqlserver.php");
+include("../config/connect_db.php");
+include("../cond_file/query-product-tires.php");
 
-include ("../cond_file/doc_info_customer_ar.php");
+$sql_sqlsvr = $select_query . $sql_cond . $sql_order;
 
-$sql_mysql= " SELECT * FROM ims_tires_master_main order by id ";
+$stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
+$stmt_sqlsvr->execute();
 
-//$myfile = fopen("qry_file1.txt", "w") or die("Unable to open file!");
-//fwrite($myfile, $sql_sqlsvr);
-//fclose($myfile);
+$sql_find = "SELECT COUNT(*) FROM ims_tires_master WHERE SKU_CODE = :SKU_CODE";
+$stmt_find = $conn->prepare($sql_find);
 
-$stmt_mysql = $conn->prepare($sql_mysql);
-$stmt_mysql->execute();
+$sql_update = "UPDATE ims_tires_master SET SKU_NAME=:SKU_NAME,SKU_KEY=:SKU_KEY,BRN_CODE=:BRN_CODE,BRN_NAME=:BRN_NAME,ICCAT_CODE=:ICCAT_CODE,ICCAT_NAME=:ICCAT_NAME 
+               WHERE SKU_CODE = :SKU_CODE";
+$stmt_update = $conn->prepare($sql_update);
 
-while ($result_mysql = $stmt_mysql->fetch(PDO::FETCH_ASSOC)) {
+$sql_insert = "INSERT INTO ims_tires_master(SKU_CODE,SKU_NAME,SKU_KEY,BRN_CODE,BRN_NAME,ICCAT_CODE,ICCAT_NAME)
+               VALUES (:SKU_CODE,:SKU_NAME,:SKU_KEY,:BRN_CODE,:BRN_NAME,:ICCAT_CODE,:ICCAT_NAME)";
+$stmt_insert = $conn->prepare($sql_insert);
 
-    $sql_find = "SELECT * FROM ims_tires_master WHERE brand = '" . $result_mysql["tires_brand"] . "'"
-    . " AND class = '" . $result_mysql["tires_class"] . "'"
-    . " AND tires_code = '" . $result_mysql["tires_code"] . "'"
-    . " AND detail = '" . $result_mysql["tires_detail"] . "'" ;
+$update_count = 0;
+$insert_count = 0;
 
-    $nRows = $conn->query($sql_find)->fetchColumn();
-    if ($nRows > 0) {
+$conn->beginTransaction();
+try {
+    while ($result_sqlsvr = $stmt_sqlsvr->fetch(PDO::FETCH_ASSOC)) {
+        $stmt_find->execute([':SKU_CODE' => $result_sqlsvr["SKU_CODE"]]);
+        $nRows = $stmt_find->fetchColumn();
 
-        $sql = "UPDATE ims_tires_master SET brand=:brand,class=:class,tires_code=:tires_code,detail=:detail
-        WHERE brand=:tires_brand AND class=:tires_class AND tires_code=:tires_code AND detail=:tires_detail ";
-        echo "Update Tires : " . $result_mysql["tires_brand"] . " | " . $result_mysql["tires_code"] . "\n\r";
-        $query = $conn->prepare($sql);
-        $query->bindParam(':brand', $result_mysql["tires_brand"], PDO::PARAM_STR);
-        $query->bindParam(':class', $result_mysql["tires_class"], PDO::PARAM_STR);
-        $query->bindParam(':tires_code', $result_mysql["tires_code"], PDO::PARAM_STR);
-        $query->bindParam(':detail', $result_mysql["tires_detail"], PDO::PARAM_STR);
-        $query->bindParam(':tires_brand', $result_mysql["tires_brand"], PDO::PARAM_STR);
-        $query->bindParam(':tires_class', $result_mysql["tires_class"], PDO::PARAM_STR);
-        $query->bindParam(':tires_code', $result_mysql["tires_code"], PDO::PARAM_STR);
-        $query->bindParam(':tires_detail', $result_mysql["tires_detail"], PDO::PARAM_STR);
-        $query->execute();
-
-    } else {
-
-        echo "Insert Tires : " . $result_mysql["tires_brand"] . " | " . $result_mysql["tires_code"] . "\n\r";
-        $sql = "INSERT INTO ims_tires_master(brand,class,tires_code,detail)
-        VALUES (:brand,:class,:tires_code,:detail)";
-        $query = $conn->prepare($sql);
-        $query->bindParam(':brand', $result_mysql["tires_brand"], PDO::PARAM_STR);
-        $query->bindParam(':class', $result_mysql["tires_class"], PDO::PARAM_STR);
-        $query->bindParam(':tires_code', $result_mysql["tires_code"], PDO::PARAM_STR);
-        $query->bindParam(':detail', $result_mysql["tires_detail"], PDO::PARAM_STR);
-        $query->execute();
-        $lastInsertId = $conn->lastInsertId();
-
-        if ($lastInsertId) {
-            echo "Save OK ";
+        if ($nRows > 0) {
+            $stmt_update->execute([
+                ':SKU_NAME' => $result_sqlsvr["SKU_NAME"],
+                ':SKU_KEY' => $result_sqlsvr["SKU_KEY"],
+                ':BRN_CODE' => $result_sqlsvr["BRN_CODE"],
+                ':BRN_NAME' => $result_sqlsvr["BRN_NAME"],
+                ':ICCAT_CODE' => $result_sqlsvr["ICCAT_CODE"],
+                ':ICCAT_NAME' => $result_sqlsvr["ICCAT_NAME"],
+                ':SKU_CODE' => $result_sqlsvr["SKU_CODE"]
+            ]);
+            $update_count++;
         } else {
-            echo "Error";
+            $stmt_insert->execute([
+                ':SKU_CODE' => $result_sqlsvr["SKU_CODE"],
+                ':SKU_NAME' => $result_sqlsvr["SKU_NAME"],
+                ':SKU_KEY' => $result_sqlsvr["SKU_KEY"],
+                ':BRN_CODE' => $result_sqlsvr["BRN_CODE"],
+                ':BRN_NAME' => $result_sqlsvr["BRN_NAME"],
+                ':ICCAT_CODE' => $result_sqlsvr["ICCAT_CODE"],
+                ':ICCAT_NAME' => $result_sqlsvr["ICCAT_NAME"]
+            ]);
+            $insert_count++;
         }
-
-
     }
+    $conn->commit();
+    echo "Import tires master completed. Updated: $update_count, Inserted: $insert_count\n\r";
+} catch (Exception $e) {
+    $conn->rollBack();
+    echo "Error: " . $e->getMessage();
 }
 
-$conn_sqlsvr=null;
-
+$conn_sqlsvr = null;
