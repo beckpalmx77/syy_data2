@@ -110,7 +110,7 @@ ORDER BY
 ";
 
 // Debug Query (ถ้าต้องการดู Query ให้ uncomment บรรทัดล่าง)
-file_put_contents("adebug_query.txt", $String_Sql);
+//file_put_contents("adebug_query.txt", $String_Sql);
 
 // =========================================================
 // 5. ประมวลผลและสร้าง CSV
