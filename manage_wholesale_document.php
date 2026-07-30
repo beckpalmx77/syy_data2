@@ -347,7 +347,7 @@ if (strlen($_SESSION['alogin']) == "") {
                     {
                         data: null,
                         render: function (data, type, row, meta) {
-                            return meta.row + 1;
+                            return meta.settings._iDisplayStart + meta.row + 1;
                         },
                         className: 'text-center'
                     },
