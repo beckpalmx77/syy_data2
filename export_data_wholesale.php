@@ -12,7 +12,7 @@ if (strlen($_SESSION['alogin']) == "") {
     $salesmen_list = [];
     try {
         if (isset($conn_sqlsvr)) {
-            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
+            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WITH (NOLOCK) WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
             if ($stmt_slmn) {
                 $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
             }
@@ -23,7 +23,7 @@ if (strlen($_SESSION['alogin']) == "") {
     $iccat_list_options = [];
     try {
         if (isset($conn_sqlsvr)) {
-            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT 
+            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT WITH (NOLOCK) 
                                  WHERE ICCAT_NAME LIKE 'ยาง%' 
                                     OR ICCAT_NAME LIKE '%น้ำมัน%' 
                                     OR ICCAT_NAME LIKE 'กระทะล้อ%' 

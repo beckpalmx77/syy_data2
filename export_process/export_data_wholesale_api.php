@@ -145,6 +145,8 @@ try {
         $result_data[] = [
             "DI_REF"          => (string)($row['DI_REF'] ?? ''),
             "DI_DATE"         => (string)($row['DI_DATE'] ?? ''),
+            "DI_TIME_CHK"     => (string)($row['DI_TIME_CHK'] ?? ''),
+            "DI_ACTIVE"       => (int)($row['DI_ACTIVE'] ?? 0),
             "AR_NAME"         => (string)($row['AR_NAME'] ?? ''),
             "DEPT_CODE"       => (string)($row['DEPT_CODE'] ?? ''),
             "DEPT_THAIDESC"   => (string)($row['DEPT_THAIDESC'] ?? ''),

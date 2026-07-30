@@ -12,7 +12,7 @@ if (strlen($_SESSION['alogin']) == "") {
     $salesmen_list = [];
     try {
         if (isset($conn_sqlsvr)) {
-            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
+            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WITH (NOLOCK) WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
             if ($stmt_slmn) {
                 $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
             }
@@ -23,7 +23,7 @@ if (strlen($_SESSION['alogin']) == "") {
     $iccat_list_options = [];
     try {
         if (isset($conn_sqlsvr)) {
-            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT 
+            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT WITH (NOLOCK) 
                                  WHERE ICCAT_NAME LIKE 'ยาง%' 
                                     OR ICCAT_NAME LIKE '%น้ำมัน%' 
                                     OR ICCAT_NAME LIKE 'กระทะล้อ%' 
@@ -178,6 +178,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                         <th class="text-center">#</th>
                                                         <th>เลขที่เอกสาร</th>
                                                         <th>วันที่</th>
+                                                        <th class="text-center">เวลาสร้าง</th>
                                                         <th>ชื่อลูกค้า</th>
                                                         <th>สาขา/แผนก</th>
                                                         <th>รหัสประเภท</th>
@@ -196,7 +197,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                 </tbody>
                                                 <tfoot class="font-weight-bold">
                                                     <tr>
-                                                        <th colspan="9" class="text-right">รวมทั้งสิ้น (Grand Total):</th>
+                                                        <th colspan="10" class="text-right">รวมทั้งสิ้น (Grand Total):</th>
                                                         <th class="text-right text-primary" id="ftTotalQty">0</th>
                                                         <th class="text-right text-info" id="ftTotalFreeQty">0</th>
                                                         <th class="text-right text-secondary" id="ftTotalDisc">0.00</th>
@@ -362,6 +363,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         }
                     },
                     { data: 'DI_DATE', className: 'text-nowrap' },
+                    { data: 'DI_TIME_CHK', className: 'text-center' },
                     { data: 'AR_NAME' },
                     {
                         data: 'DEPT_THAIDESC',
@@ -413,7 +415,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         }
                     }
                 ],
-                order: [[1, 'asc']],
+                order: [[2, 'desc'], [3, 'desc']],
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "ทั้งหมด"]],
                 language: {
