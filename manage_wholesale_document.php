@@ -187,6 +187,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                         <th>ยี่ห้อ</th>
                                                         <th class="text-right">จำนวนขาย</th>
                                                         <th class="text-right">จำนวนแถม</th>
+                                                        <th class="text-right">ราคา/หน่วย (บาท)</th>
                                                         <th class="text-right">ส่วนลด (บาท)</th>
                                                         <th class="text-right">จำนวนเงิน (บาท)</th>
                                                         <th>ชื่อเซลส์</th>
@@ -200,6 +201,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                         <th colspan="10" class="text-right">รวมทั้งสิ้น (Grand Total):</th>
                                                         <th class="text-right text-primary" id="ftTotalQty">0</th>
                                                         <th class="text-right text-info" id="ftTotalFreeQty">0</th>
+                                                        <th></th>
                                                         <th class="text-right text-secondary" id="ftTotalDisc">0.00</th>
                                                         <th class="text-right text-success" id="ftTotalAmt">0.00 ฿</th>
                                                         <th></th>

@@ -88,7 +88,7 @@ $String_Sql = $select_query_sale
     . $sql_iccat_filter
     . $sql_order_sale;
 
-$data = "DI_REF,DI_DATE,AR_NAME,DEPT_CODE,DEPT_THAIDESC,ICCAT_CODE,ICCAT_NAME,SKU_NAME,SKU_E_NAME,BRN_NAME,TRD_QTY,TRD_Q_FREE,TRD_TDSC_KEYINV,TRD_B_AMT,SLMN_CODE,SLMN_NAME\n";
+$data = "DI_REF,DI_DATE,AR_NAME,DEPT_CODE,DEPT_THAIDESC,ICCAT_CODE,ICCAT_NAME,SKU_NAME,SKU_E_NAME,BRN_NAME,TRD_QTY,TRD_Q_FREE,TRD_U_PRC,TRD_TDSC_KEYINV,TRD_B_AMT,SLMN_CODE,SLMN_NAME\n";
 
 $query = $conn_sqlsvr->prepare($String_Sql);
 $query->execute();
@@ -134,6 +134,7 @@ while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
         $clean_str($row['BRN_NAME'] ?? ''),
         $clean_str($trd_qty),
         $clean_str($trd_q_free),
+        $clean_str((float)($row['TRD_U_PRC'] ?? 0)),
         $clean_str($trd_tdsc_keyinv),
         $clean_str($trd_b_amt),
         $clean_str($row['SLMN_CODE'] ?? ''),

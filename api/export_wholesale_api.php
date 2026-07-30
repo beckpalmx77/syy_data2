@@ -157,6 +157,7 @@ try {
             "BRN_NAME"        => (string)($row['BRN_NAME'] ?? ''),
             "TRD_QTY"         => $trd_qty,
             "TRD_Q_FREE"      => $trd_q_free,
+            "TRD_U_PRC"       => (float)($row['TRD_U_PRC'] ?? 0),
             "TRD_TDSC_KEYINV" => $trd_tdsc_keyinv,
             "TRD_B_AMT"       => $trd_b_amt,
             "SLMN_CODE"       => (string)($row['SLMN_CODE'] ?? ''),
