@@ -395,7 +395,7 @@
 
             <div class="hero-stats">
                 <div class="stat-item">
-                    <span class="stat-val">3 APIs</span>
+                    <span class="stat-val">4 APIs</span>
                     <span class="stat-lbl">Active Endpoints</span>
                 </div>
                 <div class="stat-item">
@@ -437,7 +437,7 @@
                         </div>
                     </div>
                     <p class="api-desc">
-                        บริการส่งออกข้อมูลรายการขายส่ง (Wholesale Sales Data) กรองตามช่วงวันที่ (`doc_date_start` ถึง `doc_date_to`), รหัสเซลส์ (`slmn_name`), ประเภทสินค้า (`iccat_code`) พร้อมข้อมูลรวม 16 ฟิลด์
+                        บริการส่งออกข้อมูลรายการขายส่ง (Wholesale Sales Data) กรองตามช่วงวันที่ (`doc_date_start` ถึง `doc_date_to`), รหัสเซลส์ (`slmn_name`), ประเภทสินค้า (`iccat_code`) พร้อมข้อมูลรวม 17 ฟิลด์
                     </p>
                     <div class="endpoint-pill">
                         <span>/api/export_wholesale_api</span>
@@ -508,6 +508,36 @@
                 <div class="card-footer">
                     <span class="status-tag"><span class="status-dot"></span> Active v1.0</span>
                     <a href="product_cat_api_out.html" class="btn-doc">
+                        <span>ดูเอกสารคู่มือ</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 4: Sales Keyword Search API -->
+            <div class="api-card">
+                <div>
+                    <div class="api-card-header">
+                        <div class="icon-box" style="background:#fef3c7; color:#d97706;">
+                            <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                        </div>
+                        <div>
+                            <h3 class="api-title">Sales Keyword Search API</h3>
+                            <span class="badge" style="background:#fef3c7; color:#d97706; border:none; margin-top:4px; font-size:0.75rem;">Search & History</span>
+                        </div>
+                    </div>
+                    <p class="api-desc">
+                        บริการค้นหาประวัติการขายสินค้าจากคีย์เวิร์ด (`keyword` เช่น "2157015") และรหัสลูกค้า (`ar_code`) แสดงผลลัพธ์: วันที่, รหัสสินค้า, ชื่อสินค้า, ราคาขาย, จำนวน, ส่วนลด, สต๊อกคงเหลือ
+                    </p>
+                    <div class="endpoint-pill">
+                        <span>/api/search_sales_keyword_api</span>
+                        <span class="method-badge">POST / GET</span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="status-tag"><span class="status-dot"></span> Active v1.0</span>
+                    <a href="search_sales_keyword_api_out.html" class="btn-doc">
                         <span>ดูเอกสารคู่มือ</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>

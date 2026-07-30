@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เอกสารข้อกำหนด Sales Keyword Search API (JSON Format)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #06b6d4;
+            --accent: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kanit', 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark-bg);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 24px 16px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-brand i {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .nav-group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(79, 70, 229, 0.2);
+            color: #818cf8;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            max-width: 1200px;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4f46e5 100%);
+            color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #c7d2fe;
+            max-width: 700px;
+            margin-bottom: 24px;
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; }
+        .badge-info { background: rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.4); color: #67e8f9; }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        /* Flow Diagram / Step Grid */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+
+        .step-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* API Endpoint Box */
+        .endpoint-box {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            color: #fff;
+            border-radius: 10px;
+            padding: 12px 20px;
+            gap: 16px;
+            font-family: 'Fira Code', monospace;
+            margin-bottom: 24px;
+        }
+
+        .method-post {
+            background: #10b981;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .endpoint-url {
+            font-size: 1rem;
+            color: #a5f3fc;
+            flex: 1;
+        }
+
+        /* Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .param-name {
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .param-type {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #0284c7;
+            background: #e0f2fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Code Container */
+        .code-container {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #181825;
+            padding: 10px 18px;
+            color: #a6adc8;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #313244;
+        }
+
+        .code-header span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-copy {
+            background: #313244;
+            color: #cdd6f4;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-copy:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            color: var(--code-text);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Tabs for Examples */
+        .tab-group {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+            <span>Sales Search API</span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <a href="syy_api.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(99, 102, 241, 0.25); color: #a5b4fc; text-decoration: none; padding: 10px 14px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(165, 180, 252, 0.3); transition: all 0.2s;">
+                <i class="fa-solid fa-arrow-left"></i> กลับศูนย์รวม API Portal
+            </a>
+        </div>
+
+        <div class="nav-group-title">สารบัญเอกสาร</div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#overview" class="nav-link active">
+                    <i class="fa-solid fa-compass"></i> ภาพรวม & แนวคิด
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#steps" class="nav-link">
+                    <i class="fa-solid fa-list-check"></i> ขั้นตอนการพัฒนา
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#authentication" class="nav-link">
+                    <i class="fa-solid fa-key"></i> การยืนยันตัวตน
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#endpoint" class="nav-link">
+                    <i class="fa-solid fa-link"></i> Endpoint Specification
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#response-spec" class="nav-link">
+                    <i class="fa-solid fa-code"></i> โครงสร้างข้อมูล JSON
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#code-examples" class="nav-link">
+                    <i class="fa-solid fa-laptop-code"></i> ตัวอย่างการเชื่อมต่อ
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#error-codes" class="nav-link">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Error & Status Codes
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-group-title">ข้อมูลระบบ</div>
+        <div style="font-size: 0.85rem; color: #94a3b8; padding: 0 14px;">
+            <p><strong>System:</strong> SYY Data Portal</p>
+            <p><strong>Format:</strong> REST JSON API</p>
+            <p><strong>Version:</strong> v1.0.0</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Hero Banner -->
+        <header class="hero-banner" id="overview">
+            <div style="margin-bottom: 14px;">
+                <a href="syy_api.html" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); color: #e0e7ff; text-decoration: none; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.25);">
+                    <i class="fa-solid fa-arrow-left"></i> กลับศูนย์รวมเอกสาร (syy_api.html)
+                </a>
+            </div>
+            <h1 class="hero-title">
+                <i class="fa-solid fa-magnifying-glass-dollar"></i> Sales Keyword Search API
+            </h1>
+            <p class="hero-subtitle">
+                เอกสารข้อกำหนดทางเทคนิคและคู่มือใช้งาน REST JSON API สำหรับค้นหาประวัติรายการขายสินค้าตามคีย์เวิร์ด (เช่น "2157015" หรือชื่อสินค้า) และรหัสลูกค้า คืนค่าข้อมูล วันที่, รหัสสินค้า, ราคาขาย, จำนวน, ส่วนลด, สต๊อกคงเหลือ และรายละเอียดอื่นๆ
+            </p>
+            <div class="badge-group">
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Status: Active</span>
+                <span class="badge badge-info"><i class="fa-solid fa-cube"></i> Content-Type: application/json</span>
+                <span class="badge"><i class="fa-solid fa-bolt"></i> Normalized Pattern Matching</span>
+            </div>
+        </header>
+
+        <!-- Section 1: Concept & Overview -->
+        <section class="section-card">
+            <h2 class="section-title">
+                <i class="fa-solid fa-lightbulb"></i> 1. แนวคิดและเป้าหมาย (Concept & Objectives)
+            </h2>
+            <p>
+                บริการ REST API นี้สร้างขึ้นเพื่อให้พนักงานขายหรือระบบภายนอก (เช่น Mobile App, CRM, POS) สามารถค้นหาประวัติการซื้อขายสินค้าย้อนหลังได้อย่างรวดเร็ว จากการพิมพ์คีย์เวิร์ดรหัสสินค้า หรือขนาดยาง/ยี่ห้อ (เช่น พิมพ์ <code>"2157015"</code> ระบบจะจับคู่ตรงกับ <code>"215/70R15"</code> หรือ <code>"215-70-15"</code> โดยอัตโนมัติ)
+            </p>
+            <br>
+            <p><strong>คุณสมบัติหลักของ Sales Keyword Search API:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
+                <li><strong>Smart Pattern Matching:</strong> ค้นหาแบบ <code>LIKE</code> ทั้งบนรหัสสินค้า (`SKU_CODE`), ชื่อสินค้า (`SKU_NAME`) และชื่อที่ตัดอักขระพิเศษ (Slash `/`, Dash `-`, Space ` `) เพื่อความสะดวกในการพิมพ์ค้นหา</li>
+                <li><strong>Customer Filter:</strong> รองรับการระบุรหัสลูกค้า (`ar_code` เช่น <code>"KS-อ003783"</code>) หรือชื่อลูกค้าเพื่อเจาะจงค้นหาประวัติซื้อขายของลูกค้ารายนั้นๆ</li>
+                <li><strong>Required Minimum Fields:</strong> ส่งคืนข้อมูลสำคัญครบถ้วน: วันที่ (`DI_DATE`), รหัสสินค้า (`SKU_CODE`), ชื่อสินค้า (`SKU_NAME`), ราคาขายต่อหน่วย (`TRD_U_PRC`), จำนวนขาย (`TRD_QTY`), ส่วนลด (`TRD_TDSC_KEYINV`), และสต๊อกคงเหลือปัจจุบัน (`SKU_STOCK`)</li>
+                <li><strong>WITH (NOLOCK) Performance:</strong> อ่านข้อมูลประวัติการขายด้วย `WITH (NOLOCK)` ไม่บล็อกการทำงานของระบบหลัก</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Implementation Steps -->
+        <section class="section-card" id="steps">
+            <h2 class="section-title">
+                <i class="fa-solid fa-diagram-project"></i> 2. ขั้นตอนการประมวลผลระบบ (Implementation Steps)
+            </h2>
+            <p>การทำงานของไฟล์ API (<code>api/search_sales_keyword_api</code>) มีขั้นตอนหลัก 4 ขั้นตอน ดังนี้:</p>
+
+            <div class="step-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Input Parsing</div>
+                    <div class="step-desc">
+                        รับค่า <code>ar_code</code>, <code>keyword</code> และ <code>limit</code> จาก JSON Body หรือ Query String
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Pattern Normalization</div>
+                    <div class="step-desc">
+                        นำคีย์เวิร์ดมาตัดเครื่องหมาย <code>/</code>, <code>-</code> และช่องว่างออก เพื่อสร้างเงื่อนไข SQL Pattern Matching 3 ทิศทาง
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-title">SQL Query Execution</div>
+                    <div class="step-desc">
+                        รัน SQL Join ระหว่าง `DOCINFO`, `ARDETAIL`, `ARFILE`, `TRANSTKH`, `TRANSTKD`, `SKUMASTER` และ `SALESMAN`
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-title">JSON UTF-8 Formatting</div>
+                    <div class="step-desc">
+                        ปรับเครื่องหมายบวก/ลบ สำหรับเอกสารใบลดหนี้ (IS/ISO) และส่งออก JSON UTF-8 สมบูรณ์
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Authentication -->
+        <section class="section-card" id="authentication">
+            <h2 class="section-title">
+                <i class="fa-solid fa-shield-halved"></i> 3. การยืนยันตัวตน (Authentication & Headers)
+            </h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Header Key</th>
+                        <th>Type</th>
+                        <th>คำอธิบาย / ตัวอย่าง</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="param-name">Content-Type</td>
+                        <td><span class="param-type">string</span></td>
+                        <td><code>application/json; charset=utf-8</code></td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">X-API-KEY</td>
+                        <td><span class="param-type">string</span></td>
+                        <td>รหัสคีย์ยืนยันตัวตนระบบ (ถ้ามี)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 4: Endpoint Specification -->
+        <section class="section-card" id="endpoint">
+            <h2 class="section-title">
+                <i class="fa-solid fa-gears"></i> 4. ข้อกำหนด API Endpoint (Endpoint Specification)
+            </h2>
+
+            <div class="endpoint-box">
+                <span class="method-post">POST / GET</span>
+                <span class="endpoint-url">/api/search_sales_keyword_api</span>
+            </div>
+
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 600;">Request Parameters (Payload / Query String)</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>คำอธิบาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="param-name">ar_code</td>
+                        <td><span class="param-type">string</span></td>
+                        <td><span>ไม่บังคับ</span></td>
+                        <td>รหัสลูกค้า หรือชื่อลูกค้า (เช่น <code>"KG-0000005"</code> หรือ <code>"ปิยะณัฐ"</code>)</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">keyword</td>
+                        <td><span class="param-type">string</span></td>
+                        <td><span>แนะนำ</span></td>
+                        <td>คีย์เวิร์ดรหัสสินค้า ขนาดยาง หรือชื่อสินค้า (เช่น <code>"2157015"</code>, <code>"215/70R15"</code>, <code>"ATLAS"</code>)</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">limit</td>
+                        <td><span class="param-type">integer</span></td>
+                        <td><span>ไม่บังคับ</span></td>
+                        <td>จำนวนรายการที่ต้องการคืนค่า (Default: <code>50</code>, Max: <code>500</code>)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 5: JSON Response Spec -->
+        <section class="section-card" id="response-spec">
+            <h2 class="section-title">
+                <i class="fa-solid fa-brackets-curly"></i> 5. โครงสร้างตอบกลับ JSON (Response Spec)
+            </h2>
+
+            <p>โครงสร้าง JSON ตอบกลับหลัก ประกอบด้วยฟิลด์ข้อมูลการขายที่ต้องการครบถ้วน:</p>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span><i class="fa-solid fa-file-code"></i> JSON Response Example (Success 200 OK)</span>
+                    <button class="btn-copy" onclick="copyCode('json-success')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                </div>
+                <pre id="json-success">{
+  "status": "success",
+  "code": 200,
+  "message": "Sales keyword search completed successfully",
+  "total_records": 1,
+  "data": [
+    {
+      "DI_REF": "IV006907/1976",
+      "DI_DATE": "30/07/2026",
+      "DI_TIME_CHK": "16:18",
+      "AR_CODE": "KS-อ003783",
+      "AR_NAME": "ร้านอ๊อดการยาง(นายหิรัญ พงษ์สำราญ)",
+      "SKU_CODE": "AT2157015-R772",
+      "SKU_NAME": "215/70R15 8PR ATLAS/R772",
+      "TRD_U_PRC": 1620,
+      "TRD_QTY": 2,
+      "TRD_Q_FREE": 0,
+      "TRD_TDSC_KEYINV": 0,
+      "TRD_B_AMT": 3240,
+      "SKU_STOCK": 1,
+      "TRD_UTQNAME": "เส้น",
+      "SLMN_NAME": "หนึ่งH1/เมย์**"
+    }
+  ]
+}</pre>
+            </div>
+        </section>
+
+        <!-- Section 6: Integration Code Examples -->
+        <section class="section-card" id="code-examples">
+            <h2 class="section-title">
+                <i class="fa-solid fa-code"></i> 6. ตัวอย่างโค้ดเรียกใช้งานจากภายนอก (Code Examples)
+            </h2>
+
+            <div class="tab-group">
+                <button class="tab-btn active" onclick="switchTab(event, 'curl-example')">
+                    <i class="fa-solid fa-terminal"></i> cURL
+                </button>
+                <button class="tab-btn" onclick="switchTab(event, 'js-example')">
+                    <i class="fa-brands fa-js"></i> JavaScript (Fetch)
+                </button>
+                <button class="tab-btn" onclick="switchTab(event, 'python-example')">
+                    <i class="fa-brands fa-python"></i> Python
+                </button>
+                <button class="tab-btn" onclick="switchTab(event, 'php-example')">
+                    <i class="fa-brands fa-php"></i> PHP (cURL)
+                </button>
+            </div>
+
+            <!-- cURL Tab -->
+            <div id="curl-example" class="tab-content active">
+                <div class="code-container">
+                    <div class="code-header">
+                        <span><i class="fa-solid fa-terminal"></i> cURL Command</span>
+                        <button class="btn-copy" onclick="copyCode('curl-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                    </div>
+                    <pre id="curl-code">curl -X POST "http://61.7.142.26:8888/syy_data2/api/search_sales_keyword_api" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ar_code": "KS-อ003783",
+    "keyword": "2157015",
+    "limit": 50
+  }'</pre>
+                </div>
+            </div>
+
+            <!-- JS Tab -->
+            <div id="js-example" class="tab-content">
+                <div class="code-container">
+                    <div class="code-header">
+                        <span><i class="fa-brands fa-js"></i> JavaScript Fetch API</span>
+                        <button class="btn-copy" onclick="copyCode('js-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                    </div>
+                    <pre id="js-code">async function searchSalesByKeyword() {
+  const url = 'http://61.7.142.26:8888/syy_data2/api/search_sales_keyword_api';
+
+  const payload = {
+    ar_code: 'KS-อ003783',
+    keyword: '2157015',
+    limit: 50
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log('Search Result:', result);
+    return result;
+  } catch (error) {
+    console.error('Error searching sales:', error);
+  }
+}</pre>
+                </div>
+            </div>
+
+            <!-- Python Tab -->
+            <div id="python-example" class="tab-content">
+                <div class="code-container">
+                    <div class="code-header">
+                        <span><i class="fa-brands fa-python"></i> Python (requests)</span>
+                        <button class="btn-copy" onclick="copyCode('python-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                    </div>
+                    <pre id="python-code">import requests
+
+url = "http://61.7.142.26:8888/syy_data2/api/search_sales_keyword_api"
+headers = {
+    "Content-Type": "application/json"
+}
+payload = {
+    "ar_code": "KS-อ003783",
+    "keyword": "2157015",
+    "limit": 50
+}
+
+response = requests.post(url, json=payload, headers=headers)
+data = response.json()
+
+if data.get("status") == "success":
+    print(f"Found Records: {data['total_records']}")
+    for item in data["data"]:
+        print(item["DI_DATE"], item["SKU_CODE"], item["SKU_NAME"], item["TRD_U_PRC"], item["TRD_QTY"], item["SKU_STOCK"])
+else:
+    print("API Error:", data.get("message"))</pre>
+                </div>
+            </div>
+
+            <!-- PHP Tab -->
+            <div id="php-example" class="tab-content">
+                <div class="code-container">
+                    <div class="code-header">
+                        <span><i class="fa-brands fa-php"></i> PHP (cURL Client)</span>
+                        <button class="btn-copy" onclick="copyCode('php-code')"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                    </div>
+                    <pre id="php-code"><?php
+$url = "http://61.7.142.26:8888/syy_data2/api/search_sales_keyword_api";
+
+$payload = json_encode([
+    "ar_code" => "KS-อ003783",
+    "keyword" => "2157015",
+    "limit" => 50
+]);
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Content-Type: application/json"
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+print_r($result);
+?></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: HTTP Status Codes -->
+        <section class="section-card" id="error-codes">
+            <h2 class="section-title">
+                <i class="fa-solid fa-triangle-exclamation"></i> 7. รหัสตอบกลับความผิดพลาด (HTTP Status Codes & Errors)
+            </h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>HTTP Code</th>
+                        <th>Status</th>
+                        <th>สาเหตุ / ความหมาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span style="color: #10b981; font-weight: 700;">200 OK</span></td>
+                        <td><code>success</code></td>
+                        <td>ค้นหาประวัติรายการขายสำเร็จเรียบร้อย</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #f59e0b; font-weight: 700;">400 Bad Request</span></td>
+                        <td><code>error</code></td>
+                        <td>ส่ง Parameter รูปแบบไม่ถูกต้อง</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #ef4444; font-weight: 700;">401 Unauthorized</span></td>
+                        <td><code>error</code></td>
+                        <td>ไม่ได้แนบ API Key หรือ API Key ไม่ถูกต้อง / หมดอายุ</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #dc2626; font-weight: 700;">500 Internal Server Error</span></td>
+                        <td><code>error</code></td>
+                        <td>เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล SQL Server</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Sales Keyword Search API Specification | SYY Data Portal &copy; 2026</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Tab Switcher
+        function switchTab(evt, tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        // Copy Code Functionality
+        function copyCode(elementId) {
+            const codeText = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('คัดลอกโค้ดเรียบร้อยแล้ว!');
+            }).catch(err => {
+                console.error('ไม่สามารถคัดลอกโค้ดได้:', err);
+            });
+        }
+    </script>
+</body>
+</html>
