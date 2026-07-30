@@ -75,6 +75,16 @@ if (strlen($_SESSION['alogin']) == "") {
                 justify-content: center;
                 border-radius: 12px;
             }
+            .table-responsive {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            table#salesSummaryTable,
+            table#salesSummaryTable th,
+            table#salesSummaryTable td {
+                white-space: nowrap !important;
+                vertical-align: middle;
+            }
         </style>
     </head>
 
