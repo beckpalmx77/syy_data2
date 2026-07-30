@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYY API Portal | ศูนย์รวมเอกสารข้อกำหนด REST API</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
+            --secondary: #06b6d4;
+            --accent: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kanit', 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #fff;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .navbar-brand i {
+            color: var(--secondary);
+            font-size: 1.8rem;
+        }
+
+        .navbar-badge {
+            background: rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            color: #c7d2fe;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+            flex: 1;
+        }
+
+        /* Hero Header */
+        .hero {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            color: #fff;
+            padding: 48px 40px;
+            border-radius: 24px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+        }
+
+        .hero-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: #c7d2fe;
+            max-width: 800px;
+            margin-bottom: 24px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #38bdf8;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .stat-lbl {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        /* Filter Controls */
+        .search-bar-container {
+            margin-bottom: 32px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 50px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-family: inherit;
+            font-size: 1rem;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        /* API Cards Grid */
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .api-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e1;
+        }
+
+        .api-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .icon-wholesale { background: #eef2ff; color: #4f46e5; }
+        .icon-customer { background: #e0f2fe; color: #0284c7; }
+        .icon-product { background: #ecfdf5; color: #10b981; }
+
+        .api-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+
+        .api-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .endpoint-pill {
+            background: #0f172a;
+            color: #a5f3fc;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .method-badge {
+            background: #10b981;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-doc {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-doc:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+        }
+
+        .status-tag {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Server Quick Links Banner */
+        .server-banner {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 32px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .server-info h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .server-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .server-url {
+            font-family: 'Fira Code', monospace;
+            background: #f8fafc;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar">
+        <a href="syy_api.html" class="navbar-brand">
+            <i class="fa-solid fa-cubes"></i>
+            <span>SYY API Directory Portal</span>
+        </a>
+        <span class="navbar-badge"><i class="fa-solid fa-server"></i> Server: 61.7.142.26:8888</span>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Hero Header -->
+        <header class="hero">
+            <h1 class="hero-title">
+                <i class="fa-solid fa-network-wired"></i> ศูนย์รวมเอกสาร RESTful JSON API
+            </h1>
+            <p class="hero-subtitle">
+                รวบรวมคู่มือ สเปคข้อกำหนดตัวอย่างการเชื่อมต่อ และวิธีเรียกใช้งาน API ทั้งหมดของระบบ SYY Data Portal สำหรับการเชื่อมต่อกับระบบภายนอก (ERP, CRM, BI Dashboard, Mobile App)
+            </p>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-val">3 APIs</span>
+                    <span class="stat-lbl">Active Endpoints</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">JSON</span>
+                    <span class="stat-lbl">Response Format</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">UTF-8</span>
+                    <span class="stat-lbl">Encoding Standard</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">NOLOCK</span>
+                    <span class="stat-lbl">Database Optimization</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-bar-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="apiSearch" class="search-input" placeholder="ค้นหา API, Endpoint, หรือประเภทข้อมูลที่ต้องการ..." onkeyup="filterAPIs()">
+            </div>
+        </div>
+
+        <!-- API Cards Grid -->
+        <div class="api-grid" id="apiGrid">
+
+            <!-- Card 1: Wholesale Sales API -->
+            <div class="api-card">
+                <div>
+                    <div class="api-card-header">
+                        <div class="icon-box icon-wholesale">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div>
+                            <h3 class="api-title">Wholesale Sales Export API</h3>
+                            <span class="badge" style="background:#eef2ff; color:#4f46e5; border:none; margin-top:4px; font-size:0.75rem;">Wholesale Sales Data</span>
+                        </div>
+                    </div>
+                    <p class="api-desc">
+                        บริการส่งออกข้อมูลรายการขายส่ง (Wholesale Sales Data) กรองตามช่วงวันที่ (`doc_date_start` ถึง `doc_date_to`), รหัสเซลส์ (`slmn_name`), ประเภทสินค้า (`iccat_code`) พร้อมข้อมูลรวม 16 ฟิลด์
+                    </p>
+                    <div class="endpoint-pill">
+                        <span>/api/export_wholesale_api</span>
+                        <span class="method-badge">POST</span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="status-tag"><span class="status-dot"></span> Active v1.0</span>
+                    <a href="wholesale_api_out.html" class="btn-doc">
+                        <span>ดูเอกสารคู่มือ</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: Customer (AR) API -->
+            <div class="api-card">
+                <div>
+                    <div class="api-card-header">
+                        <div class="icon-box icon-customer">
+                            <i class="fa-solid fa-address-book"></i>
+                        </div>
+                        <div>
+                            <h3 class="api-title">Customer (AR) Export API</h3>
+                            <span class="badge" style="background:#e0f2fe; color:#0284c7; border:none; margin-top:4px; font-size:0.75rem;">Customer Accounts</span>
+                        </div>
+                    </div>
+                    <p class="api-desc">
+                        บริการดึงข้อมูลรายชื่อและรหัสลูกค้า (Customer Master AR) แยกตามพนักงานขาย/เขตการขาย (`slmn_name`) รองรับการเลือกพร้อมกันหลายเซลส์แบบ Array (`["ก้อย", "น๊อต"]`) ข้อมูลรวม 23 ฟิลด์
+                    </p>
+                    <div class="endpoint-pill">
+                        <span>/api/export_customer_api</span>
+                        <span class="method-badge">POST / GET</span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="status-tag"><span class="status-dot"></span> Active v1.0</span>
+                    <a href="customer_api_out.html" class="btn-doc">
+                        <span>ดูเอกสารคู่มือ</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Product Category API -->
+            <div class="api-card">
+                <div>
+                    <div class="api-card-header">
+                        <div class="icon-box icon-product">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                        <div>
+                            <h3 class="api-title">Product Category Export API</h3>
+                            <span class="badge" style="background:#ecfdf5; color:#10b981; border:none; margin-top:4px; font-size:0.75rem;">Product Categories</span>
+                        </div>
+                    </div>
+                    <p class="api-desc">
+                        บริการดึงรหัสหมวดสินค้า (`ICCAT_CODE`) และชื่อประเภทสินค้า (`ICCAT_NAME`) ดึงผ่านไฟล์เงื่อนไข `cond_file/query-product-price-main.php` สำหรับนำไปแสดงใน Dropdown หรือ Filter
+                    </p>
+                    <div class="endpoint-pill">
+                        <span>/api/export_product_cat_api</span>
+                        <span class="method-badge">POST / GET</span>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <span class="status-tag"><span class="status-dot"></span> Active v1.0</span>
+                    <a href="product_cat_api_out.html" class="btn-doc">
+                        <span>ดูเอกสารคู่มือ</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Server Environment Info -->
+        <div class="server-banner">
+            <div class="server-info">
+                <h4><i class="fa-solid fa-server" style="color:var(--primary);"></i> Production API Base Endpoint</h4>
+                <p>สามารถเรียกใช้งาน API Endpoint จากภายนอกได้ที่ Base URL นี้</p>
+            </div>
+            <div class="server-url">
+                http://61.7.142.26:8888/syy_data2/api/
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>SYY Data Portal API Documentation Center &copy; 2026</p>
+    </footer>
+
+    <script>
+        function filterAPIs() {
+            const input = document.getElementById('apiSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.api-card');
+
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                if (text.includes(input)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
