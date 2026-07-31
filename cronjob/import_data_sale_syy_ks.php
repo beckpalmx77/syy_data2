@@ -32,12 +32,21 @@ $str_group2 = array_flip(array("402-J02","401-J01","401-KV01","401-WIL01","401-W
 $str_group3 = array_flip(array("999-01","999-02","999-03","999-04","999-05","999-06","999-07","999-08","999-09","999-10","999-11","999-12","999-13","999-14","999-15","999-16","999-17","999-18","999-19","999-20","999-21","999-22","999-23","SY02-00140"));
 $str_group4 = array_flip(array("999-26","999-28","A502-ALL03"));
 
-$date_start = '2026/01/01';
-//$date_start = date("Y/m/d", strtotime("yesterday"));
-$date_to = date("Y/m/d");
+$date_start_raw = isset($argv[1]) ? trim($argv[1]) : '2026/01/01';
+$date_to_raw = isset($argv[2]) ? trim($argv[2]) : date("Y/m/d");
+
+$date_start = str_replace('-', '/', $date_start_raw);
+$date_to = str_replace('-', '/', $date_to_raw);
+
+// Convert Y/m/d to d/m/Y for MySQL DI_DATE lookup
+$ds_parts = explode('/', $date_start);
+$dt_parts = explode('/', $date_to);
+$date_start_disp = (count($ds_parts) == 3 && strlen($ds_parts[0]) == 4) ? $ds_parts[2] . '/' . $ds_parts[1] . '/' . $ds_parts[0] : $date_start;
+$date_to_disp = (count($dt_parts) == 3 && strlen($dt_parts[0]) == 4) ? $dt_parts[2] . '/' . $dt_parts[1] . '/' . $dt_parts[0] : $date_to;
 
 echo "Today is " . $date_to . "\n\r";
-echo $date_start . "\n\r";
+echo "Start Date: " . $date_start . " (MySQL Lookup: " . $date_start_disp . ")\n\r";
+echo "End Date:   " . $date_to . " (MySQL Lookup: " . $date_to_disp . ")\n\r";
 
 $query_year = " AND DOCINFO.DI_DATE BETWEEN '" . $date_start . "' AND '" . $date_to . "'";
 $sql_sqlsvr = $select_query_sale . $sql_cond_sale . $query_year . $sql_order_sale;
@@ -48,9 +57,6 @@ $stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
 $stmt_sqlsvr->execute();
 
 // Pre-load existing keys into memory hash map for fast lookup
-$date_start_disp = date("d/m/Y", strtotime("yesterday"));
-$date_to_disp = date("d/m/Y");
-
 $existing_keys = [];
 try {
     $stmt_exist = $conn->prepare("SELECT DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ FROM ims_product_sale_syy_ks WHERE DI_DATE BETWEEN :start_date AND :to_date");
