@@ -34,7 +34,7 @@ $str_group2 = array_flip(array("402-J02","401-J01","401-KV01","401-WIL01","401-W
 $str_group3 = array_flip(array("999-01","999-02","999-03","999-04","999-05","999-06","999-07","999-08","999-09","999-10","999-11","999-12","999-13","999-14","999-15","999-16","999-17","999-18","999-19","999-20","999-21","999-22","999-23","SY02-00140"));
 $str_group4 = array_flip(array("999-26","999-28","A502-ALL03"));
 
-$date_start_raw = isset($argv[1]) ? trim($argv[1]) : '2026/01/01';
+$date_start_raw = isset($argv[1]) ? trim($argv[1]) : date("Y/m/d", strtotime("yesterday"));
 $date_to_raw = isset($argv[2]) ? trim($argv[2]) : date("Y/m/d");
 
 $date_start = str_replace('-', '/', $date_start_raw);
