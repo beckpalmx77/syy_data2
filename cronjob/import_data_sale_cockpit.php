@@ -47,8 +47,6 @@ $str_group4 = array(
 
 $str_group5 = array("99998", "9-9402-ALL02", "9999-2", "501-02", "99999");
 
-//$query_daily_cond_ext = " AND (DOCTYPE.DT_DOCCODE in ('30','CS4','CS5','DS4','IS3','IS4','ISC3','ISC4','CS.8','CS.9','IC.3','IC.4','IS.3','IS.4','S.5','S.6','CS.6','CS.7','IC.1','IC.2','IS.1','IS.2','S.1','S.2','CS.2','CS.3','IC.5','IC.6','IS.5','IS.6','S.3','S.4')) ";
-
 // 1. รวม Array ทั้งหมดเข้าด้วยกัน
 $all_docs = array_merge($str_doc1, $str_doc2, $str_doc3, $str_doc4, $str_doc5, $str_doc6, $str_doc7, $str_doc8);
 
