@@ -1,6 +1,6 @@
 <?php
 include('includes/Header.php');
-include_once('config/connect_db.php');
+include_once('config/connect_sqlserver.php');
 
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
@@ -8,38 +8,33 @@ if (strlen($_SESSION['alogin']) == "") {
     $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : 'รายงาน';
     $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : 'แสดงรายการขายส่ง (Document Line Items)';
 
-    // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks (Cached in Session)
-    if (!isset($_SESSION['salesmen_list_cache']) || empty($_SESSION['salesmen_list_cache'])) {
-        try {
-            if (isset($conn)) {
-                $stmt_slmn = $conn->query("SELECT DISTINCT SLMN_CODE, SLMN_NAME FROM ims_product_sale_syy_ks WHERE SLMN_NAME IS NOT NULL AND SLMN_NAME != '' ORDER BY SLMN_NAME");
-                if ($stmt_slmn) {
-                    $_SESSION['salesmen_list_cache'] = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
-                }
+    // Fetch Active Salesmen (SLMN_ENABLE = 'Y')
+    $salesmen_list = [];
+    try {
+        if (isset($conn_sqlsvr)) {
+            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WITH (NOLOCK) WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
+            if ($stmt_slmn) {
+                $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
             }
-        } catch (Exception $e) {}
-    }
-    $salesmen_list = $_SESSION['salesmen_list_cache'] ?? [];
+        }
+    } catch (Exception $e) {}
 
-    // Fetch Product Categories from MySQL ims_product_sale_syy_ks (Cached in Session)
-    if (!isset($_SESSION['iccat_list_cache']) || empty($_SESSION['iccat_list_cache'])) {
-        try {
-            if (isset($conn)) {
-                $sql_iccat_select = "SELECT DISTINCT ICCAT_CODE, ICCAT_NAME FROM ims_product_sale_syy_ks 
-                                     WHERE ICCAT_NAME IS NOT NULL AND ICCAT_NAME != ''
-                                       AND (ICCAT_NAME LIKE 'ยาง%' 
-                                         OR ICCAT_NAME LIKE '%น้ำมัน%' 
-                                         OR ICCAT_NAME LIKE 'กระทะล้อ%' 
-                                         OR ICCAT_NAME LIKE '%กระทะ%')
-                                     ORDER BY ICCAT_CODE";
-                $stmt_iccat = $conn->query($sql_iccat_select);
-                if ($stmt_iccat) {
-                    $_SESSION['iccat_list_cache'] = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
-                }
+    // Fetch Product Categories starting with/containing 'ยาง', 'น้ำมัน', 'กระทะล้อ'
+    $iccat_list_options = [];
+    try {
+        if (isset($conn_sqlsvr)) {
+            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT WITH (NOLOCK) 
+                                 WHERE ICCAT_NAME LIKE 'ยาง%' 
+                                    OR ICCAT_NAME LIKE '%น้ำมัน%' 
+                                    OR ICCAT_NAME LIKE 'กระทะล้อ%' 
+                                    OR ICCAT_NAME LIKE '%กระทะ%'
+                                 ORDER BY ICCAT_CODE";
+            $stmt_iccat = $conn_sqlsvr->query($sql_iccat_select);
+            if ($stmt_iccat) {
+                $iccat_list_options = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
             }
-        } catch (Exception $e) {}
-    }
-    $iccat_list_options = $_SESSION['iccat_list_cache'] ?? [];
+        }
+    } catch (Exception $e) {}
     ?>
 
     <!DOCTYPE html>
@@ -327,7 +322,6 @@ if (strlen($_SESSION['alogin']) == "") {
             dataTableInstance = $('#TableRecordList').DataTable({
                 processing: true,
                 serverSide: false,
-                deferRender: true,
                 ajax: {
                     url: 'api/manage_wholesale_document_api.php',
                     type: 'POST',
@@ -423,7 +417,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         }
                     }
                 ],
-                order: [],
+                order: [[2, 'desc'], [3, 'desc']],
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "ทั้งหมด"]],
                 language: {
