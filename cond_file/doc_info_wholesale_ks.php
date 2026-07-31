@@ -1,6 +1,6 @@
 <?php
 
-// Dedicated and optimized query configuration for manage_wholesale_document & import cronjob
+// Dedicated and optimized query configuration for wholesale documents & import cronjob (doc_info_wholesale_ks.php)
 
 $select_query_sale = "
 SELECT 
@@ -91,13 +91,6 @@ LEFT JOIN SLDETAIL WITH (NOLOCK) ON DOCINFO.DI_KEY = SLDETAIL.SLD_DI
 LEFT JOIN SALESMAN WITH (NOLOCK) ON SLDETAIL.SLD_SLMN = SALESMAN.SLMN_KEY
 ";
 
-$sql_cond_sale = " 
-WHERE 
-    DOCTYPE.DT_PROPERTIES = 307
-    AND DOCINFO.DI_ACTIVE = 0
-    AND (DOCTYPE.DT_DOCCODE IN ('IV00', 'DS00', 'CV00', 'CS00', 'IS', 'ISO') 
-         OR DOCTYPE.DT_DOCCODE LIKE 'IS%' 
-         OR DOCTYPE.DT_DOCCODE LIKE 'ISO%')
-";
+$sql_cond_sale = " WHERE DOCINFO.DI_ACTIVE = 0 AND (DOCTYPE.DT_DOCCODE IN ('IV00', 'DS00', 'CV00', 'CS00', 'IS', 'ISO')) ";
 
 $sql_order_sale = " ORDER BY DOCINFO.DI_DATE DESC, DOCINFO.DI_CRE_DATE DESC, DOCINFO.DI_REF ";
