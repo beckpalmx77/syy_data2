@@ -48,7 +48,7 @@ $str_group4 = array(
 $str_group5 = array("99998", "9-9402-ALL02", "9999-2", "501-02", "99999");
 
 // 1. รวม Array ทั้งหมดเข้าด้วยกัน
-$all_docs = array_merge($str_doc1, $str_doc2, $str_doc3, $str_doc4, $str_doc5, $str_doc6, $str_doc7, $str_doc8);
+$all_docs = array_merge($str_doc1, $str_doc2, $str_doc3, $str_doc4, $str_doc5, $str_doc6, $str_doc7, $str_doc8, $str_doc9);
 
 // 2. สร้าง String สำหรับใส่ในเงื่อนไข IN (...)
 // โดยใส่เครื่องหมาย ' (single quote) คร่อมแต่ละค่า และคั่นด้วย , (comma)
