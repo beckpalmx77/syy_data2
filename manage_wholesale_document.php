@@ -5,50 +5,12 @@ include_once('config/connect_db.php');
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
 } else {
-    // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks (Cached in Session)
-    if (!isset($_SESSION['salesmen_list_cache']) || empty($_SESSION['salesmen_list_cache'])) {
-        try {
-            if (isset($conn)) {
-                $stmt_slmn = $conn->query("SELECT DISTINCT SLMN_CODE, SLMN_NAME FROM ims_product_sale_syy_ks WHERE SLMN_NAME IS NOT NULL AND SLMN_NAME != '' ORDER BY SLMN_NAME");
-                if ($stmt_slmn) {
-                    $_SESSION['salesmen_list_cache'] = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
-                }
-            }
-        } catch (Exception $e) {}
-    }
-    $salesmen_list = $_SESSION['salesmen_list_cache'] ?? [];
-
-    // Fetch Product Categories from MySQL ims_product_sale_syy_ks (Cached in Session)
-    if (!isset($_SESSION['iccat_list_cache']) || empty($_SESSION['iccat_list_cache'])) {
-        try {
-            if (isset($conn)) {
-                $sql_iccat_select = "SELECT DISTINCT ICCAT_CODE, ICCAT_NAME FROM ims_product_sale_syy_ks 
-                                     WHERE ICCAT_NAME IS NOT NULL AND ICCAT_NAME != ''
-                                       AND (ICCAT_NAME LIKE 'ยาง%' 
-                                         OR ICCAT_NAME LIKE '%น้ำมัน%' 
-                                         OR ICCAT_NAME LIKE 'กระทะล้อ%' 
-                                         OR ICCAT_NAME LIKE '%กระทะ%')
-                                     ORDER BY ICCAT_CODE";
-                $stmt_iccat = $conn->query($sql_iccat_select);
-                if ($stmt_iccat) {
-                    $_SESSION['iccat_list_cache'] = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
-                }
-            }
-        } catch (Exception $e) {}
-    }
-    $iccat_list_options = $_SESSION['iccat_list_cache'] ?? [];
     ?>
 
     <!DOCTYPE html>
     <html lang="th">
     <head>
-        <link href="js/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
         <style>
-            .select2-container--default .select2-selection--multiple {
-                border-color: #d1d3e2;
-                min-height: 38px;
-                border-radius: 0.35rem;
-            }
             .table-responsive {
                 overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
@@ -102,82 +64,22 @@ if (strlen($_SESSION['alogin']) == "") {
                         </ol>
                     </div>
 
-                    <!-- Filter Control Panel Card (Matching manage-unit.php Interface Style) -->
+                    <!-- Hidden Export Form -->
+                    <form id="excelExportForm" method="post" action="export_process/export_data_wholesale.php" target="_blank" style="display:none;">
+                    </form>
+
+                    <!-- Data Table Section Card (Matching manage-unit.php Interface Style) -->
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="card mb-12">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary"><i class="fa fa-filter"></i> ตัวกรองค้นหาข้อมูล (Filter Controls)</h6>
-                                </div>
-                                <div class="card-body">
-                                    <section class="container-fluid">
-                                        <form id="filterForm">
-                                            <div class="row">
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <label for="doc_date_start" class="control-label font-weight-bold">จากวันที่</label>
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control" id="doc_date_start" name="doc_date_start" readonly required placeholder="จากวันที่">
-                                                        <div class="input-group-append"><span class="input-group-text"><i class="fa fa-calendar"></i></span></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3 col-sm-6 mb-3">
-                                                    <label for="doc_date_to" class="control-label font-weight-bold">ถึงวันที่</label>
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control" id="doc_date_to" name="doc_date_to" readonly required placeholder="ถึงวันที่">
-                                                        <div class="input-group-append"><span class="input-group-text"><i class="fa fa-calendar"></i></span></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="slmn_name" class="control-label font-weight-bold">ชื่อพนักงานขาย</label>
-                                                    <select class="form-control select2" id="slmn_name" name="slmn_name[]" multiple="multiple">
-                                                        <?php foreach ($salesmen_list as $slmn): ?>
-                                                            <option value="<?php echo htmlspecialchars($slmn['SLMN_NAME']); ?>">
-                                                                <?php echo htmlspecialchars($slmn['SLMN_NAME'] . " (" . $slmn['SLMN_CODE'] . ")"); ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-9 mb-3">
-                                                    <label for="iccat_code" class="control-label font-weight-bold">ประเภทสินค้า (ยาง / น้ำมันเครื่อง / กระทะล้อ)</label>
-                                                    <select class="form-control select2" id="iccat_code" name="iccat_code[]" multiple="multiple">
-                                                        <?php foreach ($iccat_list_options as $cat): ?>
-                                                            <option value="<?php echo htmlspecialchars($cat['ICCAT_CODE']); ?>">
-                                                                <?php echo htmlspecialchars("[" . $cat['ICCAT_CODE'] . "] " . $cat['ICCAT_NAME']); ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-3 d-flex align-items-end">
-                                                    <button type="submit" class="btn btn-primary btn-sm btn-block mr-2" id="btnSearch">
-                                                        <i class="fa fa-search"></i> ค้นหาข้อมูล
-                                                    </button>
-                                                    <button type="button" class="btn btn-success btn-sm" id="btnExportExcel" title="ดาวน์โหลดไฟล์ Excel/CSV">
-                                                        <i class="fa fa-file-excel-o"></i> Excel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </section>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hidden Export Form -->
-                    <form id="excelExportForm" method="post" action="export_process/export_data_wholesale.php" target="_blank" style="display:none;">
-                        <input type="hidden" name="doc_date_start" id="exp_doc_date_start">
-                        <input type="hidden" name="doc_date_to" id="exp_doc_date_to">
-                        <div id="exp_slmn_container"></div>
-                        <div id="exp_iccat_container"></div>
-                    </form>
-
-                    <!-- Data Table Section Card (Matching manage-unit.php Interface Style) -->
-                    <div class="row mt-4">
-                        <div class="col-lg-12">
-                            <div class="card mb-12">
-                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary"><i class="fa fa-table"></i> รายการเอกสารขายส่ง (Wholesale Document Items)</h6>
-                                    <span class="badge badge-primary" id="totalRecordsBadge">0 รายการ</span>
+                                    <div>
+                                        <button type="button" class="btn btn-success btn-xs" id="btnExportExcel" title="ดาวน์โหลดไฟล์ Excel/CSV">
+                                            <i class="fa fa-file-excel-o"></i> Excel Export
+                                        </button>
+                                        <span class="badge badge-primary ml-2" id="totalRecordsBadge">0 รายการ</span>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12 col-md-offset-2">
@@ -293,13 +195,7 @@ if (strlen($_SESSION['alogin']) == "") {
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <!-- Select2 -->
-    <script src="js/select2/dist/js/select2.min.js"></script>
-    <!-- Bootstrap Datepicker -->
-    <script src="vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-    <script src="vendor/date-picker-1.9/js/bootstrap-datepicker.js"></script>
-    <script src="vendor/date-picker-1.9/locales/bootstrap-datepicker.th.min.js"></script>
-    <link href="vendor/date-picker-1.9/css/bootstrap-datepicker.css" rel="stylesheet"/>
+    <script src="js/myadmin.min.js"></script>
 
     <!-- DataTables v11 (Same as manage-unit.php) -->
     <script src="vendor/datatables/v11/bootbox.min.js"></script>
@@ -307,7 +203,6 @@ if (strlen($_SESSION['alogin']) == "") {
     <link rel="stylesheet" href="vendor/datatables/v11/jquery.dataTables.min.css"/>
     <link rel="stylesheet" href="vendor/datatables/v11/buttons.dataTables.min.css"/>
 
-    <script src="js/myadmin.min.js"></script>
     <script src="js/MyFrameWork/framework_util.js"></script>
     <script src="js/util.js"></script>
 
@@ -322,63 +217,11 @@ if (strlen($_SESSION['alogin']) == "") {
                 $(this).find(".fa").css({'font-size': btnFont, 'color': btnColor});
             });
 
-            // Initialize Select2 dropdowns
-            $('.select2').select2({
-                placeholder: "--- ไม่เลือก = ดึงทั้งหมด ---",
-                allowClear: true,
-                width: '100%'
-            });
-            $('#slmn_name').val(null).trigger('change');
-            $('#iccat_code').val(null).trigger('change');
-
-            // Datepicker defaults to today
-            let today = new Date();
-            let doc_date = getDay2Digits(today) + "-" + getMonth2Digits(today) + "-" + today.getFullYear();
-            $('#doc_date_start').val(doc_date);
-            $('#doc_date_to').val(doc_date);
-
-            $('#doc_date_start').datepicker({
-                format: "dd-mm-yyyy",
-                todayHighlight: true,
-                language: "th",
-                autoclose: true
-            });
-
-            $('#doc_date_to').datepicker({
-                format: "dd-mm-yyyy",
-                todayHighlight: true,
-                language: "th",
-                autoclose: true
-            });
-
             // Initialize DataTable calling backend model/manage_wholesale_document_process.php
             initDataTable();
 
-            // Form Search Submit
-            $('#filterForm').on('submit', function (e) {
-                e.preventDefault();
-                reloadDataTable();
-            });
-
             // Export Excel Button Handler
             $('#btnExportExcel').on('click', function () {
-                $('#exp_doc_date_start').val($('#doc_date_start').val());
-                $('#exp_doc_date_to').val($('#doc_date_to').val());
-
-                const slmnVals = $('#slmn_name').val() || [];
-                let slmnHtml = '';
-                slmnVals.forEach(v => {
-                    slmnHtml += `<input type="hidden" name="slmn_name[]" value="${escapeAttr(v)}">`;
-                });
-                $('#exp_slmn_container').html(slmnHtml);
-
-                const iccatVals = $('#iccat_code').val() || [];
-                let iccatHtml = '';
-                iccatVals.forEach(v => {
-                    iccatHtml += `<input type="hidden" name="iccat_code[]" value="${escapeAttr(v)}">`;
-                });
-                $('#exp_iccat_container').html(iccatHtml);
-
                 $('#excelExportForm').submit();
             });
         });
@@ -410,10 +253,6 @@ if (strlen($_SESSION['alogin']) == "") {
                     url: 'model/manage_wholesale_document_process.php',
                     data: function (d) {
                         d.action = "GET_WHOLESALE_DOCUMENT";
-                        d.doc_date_start = $('#doc_date_start').val();
-                        d.doc_date_to = $('#doc_date_to').val();
-                        d.slmn_name = $('#slmn_name').val() || null;
-                        d.iccat_code = $('#iccat_code').val() || null;
                     },
                     dataSrc: function (json) {
                         if (json && json.aaData) {
@@ -526,14 +365,6 @@ if (strlen($_SESSION['alogin']) == "") {
             });
         }
 
-        function reloadDataTable() {
-            if (dataTableInstance) {
-                dataTableInstance.ajax.reload();
-            } else {
-                initDataTable();
-            }
-        }
-
         function updateFooterTotals(dataList) {
             let totalQty = 0;
             let totalFreeQty = 0;
@@ -551,10 +382,6 @@ if (strlen($_SESSION['alogin']) == "") {
             $('#ftTotalFreeQty').text(numberWithCommas(totalFreeQty));
             $('#ftTotalDisc').text(numberWithCommas(totalDisc, 2));
             $('#ftTotalAmt').text(numberWithCommas(totalAmt, 2) + ' ฿');
-        }
-
-        function escapeAttr(str) {
-            return String(str || '').replace(/"/g, '&quot;');
         }
     </script>
 
