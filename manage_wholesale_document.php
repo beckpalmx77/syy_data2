@@ -1,6 +1,6 @@
 <?php
 include('includes/Header.php');
-include_once('config/connect_sqlserver.php');
+include_once('config/connect_db.php');
 
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
@@ -8,33 +8,38 @@ if (strlen($_SESSION['alogin']) == "") {
     $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : 'รายงาน';
     $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : 'แสดงรายการขายส่ง (Document Line Items)';
 
-    // Fetch Active Salesmen (SLMN_ENABLE = 'Y')
-    $salesmen_list = [];
-    try {
-        if (isset($conn_sqlsvr)) {
-            $stmt_slmn = $conn_sqlsvr->query("SELECT SLMN_CODE, SLMN_NAME FROM SALESMAN WITH (NOLOCK) WHERE SLMN_ENABLE = 'Y' ORDER BY SLMN_NAME");
-            if ($stmt_slmn) {
-                $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks (Cached in Session)
+    if (!isset($_SESSION['salesmen_list_cache']) || empty($_SESSION['salesmen_list_cache'])) {
+        try {
+            if (isset($conn)) {
+                $stmt_slmn = $conn->query("SELECT DISTINCT SLMN_CODE, SLMN_NAME FROM ims_product_sale_syy_ks WHERE SLMN_NAME IS NOT NULL AND SLMN_NAME != '' ORDER BY SLMN_NAME");
+                if ($stmt_slmn) {
+                    $_SESSION['salesmen_list_cache'] = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
+                }
             }
-        }
-    } catch (Exception $e) {}
+        } catch (Exception $e) {}
+    }
+    $salesmen_list = $_SESSION['salesmen_list_cache'] ?? [];
 
-    // Fetch Product Categories starting with/containing 'ยาง', 'น้ำมัน', 'กระทะล้อ'
-    $iccat_list_options = [];
-    try {
-        if (isset($conn_sqlsvr)) {
-            $sql_iccat_select = "SELECT ICCAT_CODE, ICCAT_NAME FROM ICCAT WITH (NOLOCK) 
-                                 WHERE ICCAT_NAME LIKE 'ยาง%' 
-                                    OR ICCAT_NAME LIKE '%น้ำมัน%' 
-                                    OR ICCAT_NAME LIKE 'กระทะล้อ%' 
-                                    OR ICCAT_NAME LIKE '%กระทะ%'
-                                 ORDER BY ICCAT_CODE";
-            $stmt_iccat = $conn_sqlsvr->query($sql_iccat_select);
-            if ($stmt_iccat) {
-                $iccat_list_options = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch Product Categories from MySQL ims_product_sale_syy_ks (Cached in Session)
+    if (!isset($_SESSION['iccat_list_cache']) || empty($_SESSION['iccat_list_cache'])) {
+        try {
+            if (isset($conn)) {
+                $sql_iccat_select = "SELECT DISTINCT ICCAT_CODE, ICCAT_NAME FROM ims_product_sale_syy_ks 
+                                     WHERE ICCAT_NAME IS NOT NULL AND ICCAT_NAME != ''
+                                       AND (ICCAT_NAME LIKE 'ยาง%' 
+                                         OR ICCAT_NAME LIKE '%น้ำมัน%' 
+                                         OR ICCAT_NAME LIKE 'กระทะล้อ%' 
+                                         OR ICCAT_NAME LIKE '%กระทะ%')
+                                     ORDER BY ICCAT_CODE";
+                $stmt_iccat = $conn->query($sql_iccat_select);
+                if ($stmt_iccat) {
+                    $_SESSION['iccat_list_cache'] = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
+                }
             }
-        }
-    } catch (Exception $e) {}
+        } catch (Exception $e) {}
+    }
+    $iccat_list_options = $_SESSION['iccat_list_cache'] ?? [];
     ?>
 
     <!DOCTYPE html>
@@ -118,7 +123,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 mb-3">
-                                                    <label for="slmn_name" class="control-label font-weight-bold">ชื่อพนักงานขาย (SLMN_ENABLE = 'Y')</label>
+                                                    <label for="slmn_name" class="control-label font-weight-bold">ชื่อพนักงานขาย</label>
                                                     <select class="form-control select2" id="slmn_name" name="slmn_name[]" multiple="multiple">
                                                         <?php foreach ($salesmen_list as $slmn): ?>
                                                             <option value="<?php echo htmlspecialchars($slmn['SLMN_NAME']); ?>">
@@ -322,6 +327,7 @@ if (strlen($_SESSION['alogin']) == "") {
             dataTableInstance = $('#TableRecordList').DataTable({
                 processing: true,
                 serverSide: false,
+                deferRender: true,
                 ajax: {
                     url: 'api/manage_wholesale_document_api.php',
                     type: 'POST',
@@ -352,87 +358,112 @@ if (strlen($_SESSION['alogin']) == "") {
                         render: function (data, type, row, meta) {
                             return meta.settings._iDisplayStart + meta.row + 1;
                         },
-                        className: 'text-center'
+                        className: "text-center"
                     },
                     {
-                        data: 'DI_REF',
+                        data: "DI_REF",
                         render: function (data, type, row) {
-                            const isReturn = (data && (data.indexOf('IS') === 0 || data.indexOf('ISO') === 0));
-                            if (isReturn) {
-                                return `<span class="badge badge-danger">${escapeHtml(data)}</span>`;
+                            let str = data || '';
+                            if (row.DT_DOCCODE) {
+                                str += ` <span class="badge badge-secondary" style="font-size:0.75rem;">${row.DT_DOCCODE}</span>`;
                             }
-                            return `<span class="font-weight-bold text-primary">${escapeHtml(data)}</span>`;
+                            return str;
                         }
                     },
-                    { data: 'DI_DATE', className: 'text-nowrap' },
-                    { data: 'DI_TIME_CHK', className: 'text-center' },
-                    { data: 'AR_NAME' },
+                    { data: "DI_DATE" },
+                    { data: "DI_TIME_CHK", className: "text-center" },
+                    { data: "AR_NAME" },
                     {
-                        data: 'DEPT_THAIDESC',
+                        data: null,
                         render: function (data, type, row) {
-                            return `<span class="badge badge-light border">${escapeHtml(data || row.DEPT_CODE || '')}</span>`;
+                            let code = row.DEPT_CODE || '';
+                            let name = row.DEPT_THAIDESC || '';
+                            if (code && name) return `${name} (${code})`;
+                            return name || code || '-';
                         }
                     },
-                    { data: 'ICCAT_CODE' },
-                    { data: 'ICCAT_NAME' },
-                    { data: 'SKU_NAME' },
-                    { data: 'BRN_NAME' },
+                    { data: "ICCAT_CODE" },
+                    { data: "ICCAT_NAME" },
                     {
-                        data: 'TRD_QTY',
-                        className: 'text-right font-weight-bold',
-                        render: function (data) {
-                            const val = parseFloat(data || 0);
-                            return val < 0 ? `<span class="text-danger">${numberWithCommas(val)}</span>` : numberWithCommas(val);
+                        data: "SKU_NAME",
+                        render: function (data, type, row) {
+                            let name = data || '';
+                            if (row.SKU_E_NAME) {
+                                name += `<br><small class="text-muted">${row.SKU_E_NAME}</small>`;
+                            }
+                            return name;
                         }
                     },
+                    { data: "BRN_NAME" },
                     {
-                        data: 'TRD_Q_FREE',
-                        className: 'text-right text-info',
-                        render: function (data) {
-                            return numberWithCommas(parseFloat(data || 0));
-                        }
-                    },
-                    {
-                        data: 'TRD_TDSC_KEYINV',
-                        className: 'text-right text-secondary',
-                        render: function (data) {
-                            return numberWithCommas(parseFloat(data || 0).toFixed(2));
-                        }
-                    },
-                    {
-                        data: 'TRD_B_AMT',
-                        className: 'text-right font-weight-bold',
-                        render: function (data) {
-                            const val = parseFloat(data || 0);
+                        data: "TRD_QTY",
+                        render: function (data, type, row) {
+                            let val = parseFloat(data) || 0;
                             if (val < 0) {
-                                return `<span class="text-danger">${numberWithCommas(val.toFixed(2))} ฿</span>`;
+                                return `<span class="badge badge-return">${numberWithCommas(val)}</span>`;
                             }
-                            return `<span class="text-success">${numberWithCommas(val.toFixed(2))} ฿</span>`;
-                        }
+                            return numberWithCommas(val);
+                        },
+                        className: "text-right"
                     },
                     {
-                        data: 'SLMN_NAME',
+                        data: "TRD_Q_FREE",
                         render: function (data, type, row) {
-                            return `<span class="badge badge-primary">${escapeHtml(data || row.SLMN_CODE || '')}</span>`;
+                            let val = parseFloat(data) || 0;
+                            return numberWithCommas(val);
+                        },
+                        className: "text-right"
+                    },
+                    {
+                        data: "TRD_U_PRC",
+                        render: function (data, type, row) {
+                            return numberWithCommas(parseFloat(data) || 0, 2);
+                        },
+                        className: "text-right"
+                    },
+                    {
+                        data: "TRD_TDSC_KEYINV",
+                        render: function (data, type, row) {
+                            return numberWithCommas(parseFloat(data) || 0, 2);
+                        },
+                        className: "text-right"
+                    },
+                    {
+                        data: "TRD_B_AMT",
+                        render: function (data, type, row) {
+                            let val = parseFloat(data) || 0;
+                            if (val < 0) {
+                                return `<span class="badge badge-return">${numberWithCommas(val, 2)} ฿</span>`;
+                            }
+                            return numberWithCommas(val, 2) + " ฿";
+                        },
+                        className: "text-right font-weight-bold"
+                    },
+                    {
+                        data: "SLMN_NAME",
+                        render: function (data, type, row) {
+                            let name = data || '';
+                            let code = row.SLMN_CODE || '';
+                            if (code) return `${name} (${code})`;
+                            return name;
                         }
                     }
                 ],
-                order: [[2, 'desc'], [3, 'desc']],
+                order: [],
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "ทั้งหมด"]],
                 language: {
-                    processing: "กำลังโหลดข้อมูล...",
                     search: "ค้นหาในตาราง:",
-                    lengthMenu: "แสดง _MENU_ รายการ",
+                    lengthMenu: "แสดง _MENU_ รายการ/หน้า",
+                    zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
                     info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                    infoEmpty: "ไม่มีรายการข้อมูล",
+                    infoEmpty: "แสดง 0 ถึง 0 จาก 0 รายการ",
                     infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
-                    zeroRecords: "ไม่พบข้อมูลตามเงื่อนไขที่เลือก",
                     paginate: {
                         first: "หน้าแรก",
-                        previous: "ก่อนหน้า",
+                        last: "หน้าสุดท้าย",
                         next: "ถัดไป",
-                        last: "หน้าสุดท้าย"
+                        previous: "ก่อนหน้า"
                     }
                 }
             });
@@ -441,6 +472,8 @@ if (strlen($_SESSION['alogin']) == "") {
         function reloadDataTable() {
             if (dataTableInstance) {
                 dataTableInstance.ajax.reload();
+            } else {
+                initDataTable();
             }
         }
 
@@ -451,33 +484,23 @@ if (strlen($_SESSION['alogin']) == "") {
             let totalAmt = 0;
 
             dataList.forEach(item => {
-                totalQty += parseFloat(item.TRD_QTY || 0);
-                totalFreeQty += parseFloat(item.TRD_Q_FREE || 0);
-                totalDisc += parseFloat(item.TRD_TDSC_KEYINV || 0);
-                totalAmt += parseFloat(item.TRD_B_AMT || 0);
+                totalQty += (parseFloat(item.TRD_QTY) || 0);
+                totalFreeQty += (parseFloat(item.TRD_Q_FREE) || 0);
+                totalDisc += (parseFloat(item.TRD_TDSC_KEYINV) || 0);
+                totalAmt += (parseFloat(item.TRD_B_AMT) || 0);
             });
 
             $('#ftTotalQty').text(numberWithCommas(totalQty));
             $('#ftTotalFreeQty').text(numberWithCommas(totalFreeQty));
-            $('#ftTotalDisc').text(numberWithCommas(totalDisc.toFixed(2)));
-            $('#ftTotalAmt').html(totalAmt < 0 ? `<span class="text-danger">${numberWithCommas(totalAmt.toFixed(2))} ฿</span>` : `${numberWithCommas(totalAmt.toFixed(2))} ฿`);
+            $('#ftTotalDisc').text(numberWithCommas(totalDisc, 2));
+            $('#ftTotalAmt').text(numberWithCommas(totalAmt, 2) + ' ฿');
         }
 
-        function numberWithCommas(x) {
-            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        function escapeHtml(text) {
-            return text ? String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : '';
-        }
-
-        function escapeAttr(text) {
-            return text ? String(text).replace(/"/g, "&quot;") : '';
+        function escapeAttr(str) {
+            return String(str || '').replace(/"/g, '&quot;');
         }
     </script>
 
     </body>
-
     </html>
-
 <?php } ?>

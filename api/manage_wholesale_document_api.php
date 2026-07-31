@@ -7,13 +7,12 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, X-API-KEY");
 
 // Handle OPTIONS preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-include('../config/connect_sqlserver.php');
-include('../cond_file/doc_info_wholesale_ks.php');
+include(__DIR__ . '/../config/connect_db.php');
 
 // Parse input parameters (from Form POST/GET or JSON Body)
 $raw_input = file_get_contents('php://input');
@@ -22,21 +21,59 @@ $json_input = json_decode($raw_input, true) ?? [];
 $doc_date_start_input = $_REQUEST['doc_date_start'] ?? $json_input['doc_date_start'] ?? date('d-m-Y');
 $doc_date_to_input = $_REQUEST['doc_date_to'] ?? $json_input['doc_date_to'] ?? date('d-m-Y');
 
-// Helper function to format date for SQL Server query (YYYY/MM/DD)
-function format_date_sql($date_str) {
+function parse_date_formats($date_str) {
     $date_str = trim((string)$date_str);
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_str)) {
-        return str_replace('-', '/', $date_str);
+        $parts = explode('-', $date_str);
+        return [
+            'ymd' => $date_str,
+            'dmy' => $parts[2] . '/' . $parts[1] . '/' . $parts[0]
+        ];
     } elseif (preg_match('/^\d{2}-\d{2}-\d{4}$/', $date_str)) {
-        return substr($date_str, 6, 4) . "/" . substr($date_str, 3, 2) . "/" . substr($date_str, 0, 2);
+        $parts = explode('-', $date_str);
+        return [
+            'ymd' => $parts[2] . '-' . $parts[1] . '-' . $parts[0],
+            'dmy' => $parts[0] . '/' . $parts[1] . '/' . $parts[2]
+        ];
+    } elseif (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $date_str)) {
+        $parts = explode('/', $date_str);
+        return [
+            'ymd' => $parts[2] . '-' . $parts[1] . '-' . $parts[0],
+            'dmy' => $date_str
+        ];
     } elseif (preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $date_str)) {
-        return $date_str;
+        $parts = explode('/', $date_str);
+        return [
+            'ymd' => $parts[0] . '-' . $parts[1] . '-' . $parts[2],
+            'dmy' => $parts[2] . '/' . $parts[1] . '/' . $parts[0]
+        ];
     }
-    return date('Y/m/d');
+    return [
+        'ymd' => date('Y-m-d'),
+        'dmy' => date('d/m/Y')
+    ];
 }
 
-$doc_date_start = format_date_sql($doc_date_start_input);
-$doc_date_to = format_date_sql($doc_date_to_input);
+$start_info = parse_date_formats($doc_date_start_input);
+$to_info = parse_date_formats($doc_date_to_input);
+
+if ($start_info['dmy'] === $to_info['dmy']) {
+    $sql_date_where = " DI_DATE = '" . $start_info['dmy'] . "' ";
+} else {
+    $st = strtotime($start_info['ymd']);
+    $et = strtotime($to_info['ymd']);
+    $diff_days = round(($et - $st) / 86400);
+
+    if ($st && $et && $diff_days >= 0 && $diff_days <= 90) {
+        $dates_list = [];
+        for ($curr = $st; $curr <= $et; $curr += 86400) {
+            $dates_list[] = date('d/m/Y', $curr);
+        }
+        $sql_date_where = " DI_DATE IN ('" . implode("','", $dates_list) . "') ";
+    } else {
+        $sql_date_where = " STR_TO_DATE(DI_DATE, '%d/%m/%Y') BETWEEN '" . $start_info['ymd'] . "' AND '" . $to_info['ymd'] . "' ";
+    }
+}
 
 // Parse salesman filter
 $slmn_input = $_REQUEST['slmn_name'] ?? $json_input['slmn_name'] ?? null;
@@ -65,7 +102,7 @@ if (!empty($slmn_list)) {
     $slmn_conditions = [];
     foreach ($slmn_list as $slmn_val) {
         $escaped_val = str_replace("'", "''", $slmn_val);
-        $slmn_conditions[] = "(SALESMAN.SLMN_NAME LIKE '%" . $escaped_val . "%' OR SALESMAN.SLMN_CODE LIKE '%" . $escaped_val . "%')";
+        $slmn_conditions[] = "(SLMN_NAME LIKE '%" . $escaped_val . "%' OR SLMN_CODE LIKE '%" . $escaped_val . "%')";
     }
     $sql_slmn_filter = " AND (" . implode(" OR ", $slmn_conditions) . ") ";
 }
@@ -97,50 +134,29 @@ if (!empty($iccat_list)) {
     $iccat_conditions = [];
     foreach ($iccat_list as $iccat_val) {
         $escaped_val = str_replace("'", "''", $iccat_val);
-        $iccat_conditions[] = "(ICCAT.ICCAT_CODE LIKE '%" . $escaped_val . "%' OR ICCAT.ICCAT_NAME LIKE '%" . $escaped_val . "%')";
+        $iccat_conditions[] = "(ICCAT_CODE LIKE '%" . $escaped_val . "%' OR ICCAT_NAME LIKE '%" . $escaped_val . "%')";
     }
     $sql_iccat_filter = " AND (" . implode(" OR ", $iccat_conditions) . ") ";
 }
 
-$table_filed_where = "DOCINFO.DI_DATE";
-
-$String_Sql = $select_query_sale
-    . $sql_cond_sale
-    . " AND " . $table_filed_where . " BETWEEN '" . $doc_date_start . "' AND '" . $doc_date_to . "' "
-    . $sql_slmn_filter
-    . $sql_iccat_filter
-    . $sql_order_sale;
+$String_Sql = "SELECT DI_KEY, DI_REF, DI_DATE, DI_TIME_CHK, DI_ACTIVE, AR_NAME, DEPT_CODE, DEPT_THAIDESC,
+                      ICCAT_CODE, ICCAT_NAME, SKU_NAME, SKU_E_NAME, BRN_NAME, TRD_QTY, TRD_Q_FREE,
+                      TRD_U_PRC, TRD_TDSC_KEYINV, TRD_B_AMT, SLMN_CODE, SLMN_NAME, DT_DOCCODE
+               FROM ims_product_sale_syy_ks
+               WHERE " . $sql_date_where
+               . $sql_slmn_filter
+               . $sql_iccat_filter
+               . " ORDER BY DI_KEY DESC
+               LIMIT 10000";
 
 try {
-    $query = $conn_sqlsvr->prepare($String_Sql);
+    $query = $conn->prepare($String_Sql);
     $query->execute();
 
     $result_data = [];
     while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-        $dt_doccode = (string)($row['DT_DOCCODE'] ?? '');
-        $is_minus_doc = (strpos($dt_doccode, 'IS') !== false || strpos($dt_doccode, 'ISO') !== false);
-
-        $trd_qty = (float)($row['TRD_QTY'] ?? 0);
-        $trd_q_free = (float)($row['TRD_Q_FREE'] ?? 0);
-        $trd_tdsc_keyinv = (float)($row['TRD_TDSC_KEYINV'] ?? 0);
-        $trd_b_amt = (float)($row['TRD_B_AMT'] ?? 0);
-
-        if ($is_minus_doc) {
-            if ($trd_qty > 0) {
-                $trd_qty = -$trd_qty;
-            }
-            if ($trd_q_free > 0) {
-                $trd_q_free = -$trd_q_free;
-            }
-            if ($trd_tdsc_keyinv > 0) {
-                $trd_tdsc_keyinv = -$trd_tdsc_keyinv;
-            }
-            if ($trd_b_amt > 0) {
-                $trd_b_amt = -$trd_b_amt;
-            }
-        }
-
         $result_data[] = [
+            "DI_KEY"          => (int)($row['DI_KEY'] ?? 0),
             "DI_REF"          => (string)($row['DI_REF'] ?? ''),
             "DI_DATE"         => (string)($row['DI_DATE'] ?? ''),
             "DI_TIME_CHK"     => (string)($row['DI_TIME_CHK'] ?? ''),
@@ -153,13 +169,14 @@ try {
             "SKU_NAME"        => (string)($row['SKU_NAME'] ?? ''),
             "SKU_E_NAME"      => (string)($row['SKU_E_NAME'] ?? ''),
             "BRN_NAME"        => (string)($row['BRN_NAME'] ?? ''),
-            "TRD_QTY"         => $trd_qty,
-            "TRD_Q_FREE"      => $trd_q_free,
+            "TRD_QTY"         => (float)($row['TRD_QTY'] ?? 0),
+            "TRD_Q_FREE"      => (float)($row['TRD_Q_FREE'] ?? 0),
             "TRD_U_PRC"       => (float)($row['TRD_U_PRC'] ?? 0),
-            "TRD_TDSC_KEYINV" => $trd_tdsc_keyinv,
-            "TRD_B_AMT"       => $trd_b_amt,
+            "TRD_TDSC_KEYINV" => (float)($row['TRD_TDSC_KEYINV'] ?? 0),
+            "TRD_B_AMT"       => (float)($row['TRD_B_AMT'] ?? 0),
             "SLMN_CODE"       => (string)($row['SLMN_CODE'] ?? ''),
-            "SLMN_NAME"       => (string)($row['SLMN_NAME'] ?? '')
+            "SLMN_NAME"       => (string)($row['SLMN_NAME'] ?? ''),
+            "DT_DOCCODE"      => (string)($row['DT_DOCCODE'] ?? '')
         ];
     }
 
