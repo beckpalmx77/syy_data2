@@ -161,6 +161,7 @@ if ($action === 'GET_DATA_SALE_SAC' || $action === 'GET_DATA_SALE_KS' || $action
             "SKU_NAME" => $r['SKU_NAME'],
             "TRD_QTY" => number_format((float)$r['TRD_QTY'], 2),
             "TRD_U_PRC" => number_format((float)$r['TRD_U_PRC'], 2),
+            "TRD_TDSC_KEYINV" => number_format((float)($r['TRD_TDSC_KEYINV'] ?? $r['TRD_DSC_KEYINV'] ?? 0), 2),
             "TRD_G_KEYIN" => number_format($amt_display, 2),
             "TRD_B_SELL" => number_format((float)$r['TRD_B_SELL'], 2),
             "TRD_B_VAT" => number_format((float)$r['TRD_B_VAT'], 2),

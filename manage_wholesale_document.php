@@ -92,6 +92,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                     <th>รายละเอียดสินค้า</th>
                                                     <th>จำนวน</th>
                                                     <th>ราคา/หน่วย</th>
+                                                    <th>ส่วนลด</th>
                                                     <th>จำนวนเงิน</th>
                                                     <th>มูลค่าสินค้า</th>
                                                     <th>ภาษีมูลค่าเพิ่ม</th>
@@ -111,6 +112,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                     <th>รายละเอียดสินค้า</th>
                                                     <th>จำนวน</th>
                                                     <th>ราคา/หน่วย</th>
+                                                    <th>ส่วนลด</th>
                                                     <th>จำนวนเงิน</th>
                                                     <th>มูลค่าสินค้า</th>
                                                     <th>ภาษีมูลค่าเพิ่ม</th>
@@ -451,6 +453,7 @@ if (strlen($_SESSION['alogin']) == "") {
                     {data: 'SKU_NAME'},
                     {data: 'TRD_QTY'},
                     {data: 'TRD_U_PRC'},
+                    {data: 'TRD_TDSC_KEYINV'},
                     {data: 'TRD_G_KEYIN'},
                     {data: 'TRD_B_SELL'},
                     {data: 'TRD_B_VAT'},
