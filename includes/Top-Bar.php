@@ -92,11 +92,11 @@
             });
         }
 
-        load_unseen_notification();
+        // load_unseen_notification();
 
         $(document).on('click', '.dropdown-toggle', function(){
             $('.count').html('');
-            load_unseen_notification('yes');
+            // load_unseen_notification('yes');
         });
 
         //setInterval(function(){

@@ -34,7 +34,7 @@ function parse_date_formats($date_str) {
     } elseif (preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $date_str)) {
         $parts = explode('/', $date_str);
         return [
-            'ymd' => $parts[0] . '-' . $parts[1] . '-' . $parts[2],
+            'ymd' => $parts[0] . '-' . $parts[1] . '-' . $parts[0],
             'dmy' => $parts[2] . '/' . $parts[1] . '/' . $parts[0]
         ];
     }
@@ -50,10 +50,22 @@ $to_info = parse_date_formats($doc_date_to_raw);
 if ($start_info['dmy'] === $to_info['dmy']) {
     $sql_date_where = " DI_DATE = '" . $start_info['dmy'] . "' ";
 } else {
-    $sql_date_where = " STR_TO_DATE(DI_DATE, '%d/%m/%Y') BETWEEN '" . $start_info['ymd'] . "' AND '" . $to_info['ymd'] . "' ";
+    $st = strtotime($start_info['ymd']);
+    $et = strtotime($to_info['ymd']);
+    $diff_days = round(($et - $st) / 86400);
+
+    if ($st && $et && $diff_days >= 0 && $diff_days <= 90) {
+        $dates_list = [];
+        for ($curr = $st; $curr <= $et; $curr += 86400) {
+            $dates_list[] = date('d/m/Y', $curr);
+        }
+        $sql_date_where = " DI_DATE IN ('" . implode("','", $dates_list) . "') ";
+    } else {
+        $sql_date_where = " STR_TO_DATE(DI_DATE, '%d/%m/%Y') BETWEEN '" . $start_info['ymd'] . "' AND '" . $to_info['ymd'] . "' ";
+    }
 }
 
-// Filter by Salesman Name / Code (Supports single or multiple values)
+// Filter by Salesman Name / Code
 $slmn_input = $_POST['slmn_name'] ?? $_GET['slmn_name'] ?? null;
 $slmn_list = [];
 if (!empty($slmn_input)) {
@@ -85,7 +97,7 @@ if (!empty($slmn_list)) {
     $sql_slmn_filter = " AND (" . implode(" OR ", $slmn_conditions) . ") ";
 }
 
-// Filter by Product Category Code / Name (Supports single or multiple values)
+// Filter by Product Category Code / Name
 $iccat_input = $_POST['iccat_code'] ?? $_GET['iccat_code'] ?? null;
 $iccat_list = [];
 if (!empty($iccat_input)) {
@@ -124,7 +136,8 @@ $String_Sql = "SELECT DI_KEY, DI_REF, DI_DATE, DI_TIME_CHK, DI_ACTIVE, AR_NAME, 
                WHERE " . $sql_date_where
                . $sql_slmn_filter
                . $sql_iccat_filter
-               . " ORDER BY DI_KEY DESC";
+               . " ORDER BY DI_KEY DESC
+               LIMIT 10000";
 
 $data = "DI_REF,DI_DATE,AR_NAME,DEPT_CODE,DEPT_THAIDESC,ICCAT_CODE,ICCAT_NAME,SKU_NAME,SKU_E_NAME,BRN_NAME,TRD_QTY,TRD_Q_FREE,TRD_U_PRC,TRD_TDSC_KEYINV,TRD_B_AMT,SLMN_CODE,SLMN_NAME\n";
 

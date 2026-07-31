@@ -60,7 +60,19 @@ $to_info = parse_date_formats($doc_date_to_input);
 if ($start_info['dmy'] === $to_info['dmy']) {
     $sql_date_where = " DI_DATE = '" . $start_info['dmy'] . "' ";
 } else {
-    $sql_date_where = " STR_TO_DATE(DI_DATE, '%d/%m/%Y') BETWEEN '" . $start_info['ymd'] . "' AND '" . $to_info['ymd'] . "' ";
+    $st = strtotime($start_info['ymd']);
+    $et = strtotime($to_info['ymd']);
+    $diff_days = round(($et - $st) / 86400);
+
+    if ($st && $et && $diff_days >= 0 && $diff_days <= 90) {
+        $dates_list = [];
+        for ($curr = $st; $curr <= $et; $curr += 86400) {
+            $dates_list[] = date('d/m/Y', $curr);
+        }
+        $sql_date_where = " DI_DATE IN ('" . implode("','", $dates_list) . "') ";
+    } else {
+        $sql_date_where = " STR_TO_DATE(DI_DATE, '%d/%m/%Y') BETWEEN '" . $start_info['ymd'] . "' AND '" . $to_info['ymd'] . "' ";
+    }
 }
 
 // Parse salesman filter

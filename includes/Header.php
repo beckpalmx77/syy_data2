@@ -8,7 +8,7 @@
     <link href="../img/logo/logo.png" rel="icon">
     <title>สงวนยางยนต์ชุมพร | SYY</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script-->
     <script src="../js/jquery-3.5.1.min.js"></script>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -42,7 +42,9 @@
     <script src="../js/subscript.js"></script>
 
     <?php
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     error_reporting(0);
     ?>
 

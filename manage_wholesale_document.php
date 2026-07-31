@@ -8,34 +8,38 @@ if (strlen($_SESSION['alogin']) == "") {
     $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : 'รายงาน';
     $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : 'แสดงรายการขายส่ง (Document Line Items)';
 
-    // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks
-    $salesmen_list = [];
-    try {
-        if (isset($conn)) {
-            $stmt_slmn = $conn->query("SELECT DISTINCT SLMN_CODE, SLMN_NAME FROM ims_product_sale_syy_ks WHERE SLMN_NAME IS NOT NULL AND SLMN_NAME != '' ORDER BY SLMN_NAME");
-            if ($stmt_slmn) {
-                $salesmen_list = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks (Cached in Session)
+    if (!isset($_SESSION['salesmen_list_cache']) || empty($_SESSION['salesmen_list_cache'])) {
+        try {
+            if (isset($conn)) {
+                $stmt_slmn = $conn->query("SELECT DISTINCT SLMN_CODE, SLMN_NAME FROM ims_product_sale_syy_ks WHERE SLMN_NAME IS NOT NULL AND SLMN_NAME != '' ORDER BY SLMN_NAME");
+                if ($stmt_slmn) {
+                    $_SESSION['salesmen_list_cache'] = $stmt_slmn->fetchAll(PDO::FETCH_ASSOC);
+                }
             }
-        }
-    } catch (Exception $e) {}
+        } catch (Exception $e) {}
+    }
+    $salesmen_list = $_SESSION['salesmen_list_cache'] ?? [];
 
-    // Fetch Product Categories from MySQL ims_product_sale_syy_ks
-    $iccat_list_options = [];
-    try {
-        if (isset($conn)) {
-            $sql_iccat_select = "SELECT DISTINCT ICCAT_CODE, ICCAT_NAME FROM ims_product_sale_syy_ks 
-                                 WHERE ICCAT_NAME IS NOT NULL AND ICCAT_NAME != ''
-                                   AND (ICCAT_NAME LIKE 'ยาง%' 
-                                     OR ICCAT_NAME LIKE '%น้ำมัน%' 
-                                     OR ICCAT_NAME LIKE 'กระทะล้อ%' 
-                                     OR ICCAT_NAME LIKE '%กระทะ%')
-                                 ORDER BY ICCAT_CODE";
-            $stmt_iccat = $conn->query($sql_iccat_select);
-            if ($stmt_iccat) {
-                $iccat_list_options = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch Product Categories from MySQL ims_product_sale_syy_ks (Cached in Session)
+    if (!isset($_SESSION['iccat_list_cache']) || empty($_SESSION['iccat_list_cache'])) {
+        try {
+            if (isset($conn)) {
+                $sql_iccat_select = "SELECT DISTINCT ICCAT_CODE, ICCAT_NAME FROM ims_product_sale_syy_ks 
+                                     WHERE ICCAT_NAME IS NOT NULL AND ICCAT_NAME != ''
+                                       AND (ICCAT_NAME LIKE 'ยาง%' 
+                                         OR ICCAT_NAME LIKE '%น้ำมัน%' 
+                                         OR ICCAT_NAME LIKE 'กระทะล้อ%' 
+                                         OR ICCAT_NAME LIKE '%กระทะ%')
+                                     ORDER BY ICCAT_CODE";
+                $stmt_iccat = $conn->query($sql_iccat_select);
+                if ($stmt_iccat) {
+                    $_SESSION['iccat_list_cache'] = $stmt_iccat->fetchAll(PDO::FETCH_ASSOC);
+                }
             }
-        }
-    } catch (Exception $e) {}
+        } catch (Exception $e) {}
+    }
+    $iccat_list_options = $_SESSION['iccat_list_cache'] ?? [];
     ?>
 
     <!DOCTYPE html>
