@@ -61,4 +61,6 @@ if ($query->rowCount() == 1) {
             echo 0;
         }
     }
+} else {
+    echo 0;
 }

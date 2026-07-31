@@ -8,8 +8,14 @@
     <link href="../img/logo/logo.png" rel="icon">
     <title>สงวนยางยนต์ชุมพร | SYY</title>
 
-    <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script-->
-    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script>
+        if (typeof window.jQuery === 'undefined') {
+            document.write('<script src="../js/jquery-3.5.1.min.js"><\/script>');
+            document.write('<script src="../vendor/jquery/jquery.min.js"><\/script>');
+        }
+    </script>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
