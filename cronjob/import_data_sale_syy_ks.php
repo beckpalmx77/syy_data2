@@ -32,7 +32,8 @@ $str_group2 = array_flip(array("402-J02","401-J01","401-KV01","401-WIL01","401-W
 $str_group3 = array_flip(array("999-01","999-02","999-03","999-04","999-05","999-06","999-07","999-08","999-09","999-10","999-11","999-12","999-13","999-14","999-15","999-16","999-17","999-18","999-19","999-20","999-21","999-22","999-23","SY02-00140"));
 $str_group4 = array_flip(array("999-26","999-28","A502-ALL03"));
 
-$date_start = date("Y/m/d", strtotime("yesterday"));
+$date_start = '2026/01/01';
+//$date_start = date("Y/m/d", strtotime("yesterday"));
 $date_to = date("Y/m/d");
 
 echo "Today is " . $date_to . "\n\r";
@@ -104,6 +105,11 @@ TRD_B_SELL, TRD_B_VAT, TRD_B_AMT, WL_CODE, WH_CODE, ARCD_NAME, BRANCH, PGROUP
 :TRD_B_SELL, :TRD_B_VAT, :TRD_B_AMT, :WL_CODE, :WH_CODE, :ARCD_NAME, :BRANCH, :PGROUP
 )";
 $stmt_insert = $conn->prepare($sql_insert);
+
+echo "--------------------------------------------------------\n\r";
+echo "MySQL UPDATE SQL Template:\n\r" . $sql_update . "\n\r\n\r";
+echo "MySQL INSERT SQL Template:\n\r" . $sql_insert . "\n\r";
+echo "--------------------------------------------------------\n\r";
 
 $update_count = 0;
 $insert_count = 0;
@@ -244,10 +250,14 @@ try {
         if ($is_update) {
             $stmt_update->execute($params);
             $update_count++;
+            $sql_update_rec = "UPDATE ims_product_sale_syy_ks SET AR_CODE='" . str_replace("'", "''", $params[':AR_CODE']) . "', AR_NAME='" . str_replace("'", "''", $params[':AR_NAME']) . "', SKU_CODE='" . str_replace("'", "''", $params[':SKU_CODE']) . "', SKU_NAME='" . str_replace("'", "''", $params[':SKU_NAME']) . "', TRD_QTY={$params[':TRD_QTY']}, TRD_B_AMT={$params[':TRD_B_AMT']} WHERE DI_KEY={$params[':DI_KEY']} AND DI_REF='{$params[':DI_REF']}' AND DI_DATE='{$params[':DI_DATE']}' AND DT_DOCCODE='{$params[':DT_DOCCODE']}' AND TRD_SEQ={$params[':TRD_SEQ']};";
+            echo "[UPDATE #" . $update_count . "] " . $sql_update_rec . "\r\n\r\n";
         } else {
             $stmt_insert->execute($params);
             $existing_keys[$key] = true;
             $insert_count++;
+            $sql_insert_rec = "INSERT INTO ims_product_sale_syy_ks (DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ, AR_CODE, AR_NAME, SKU_CODE, SKU_NAME, TRD_QTY, TRD_B_AMT, SLMN_NAME, BRANCH) VALUES ({$params[':DI_KEY']}, '{$params[':DI_REF']}', '{$params[':DI_DATE']}', '{$params[':DT_DOCCODE']}', {$params[':TRD_SEQ']}, '" . str_replace("'", "''", $params[':AR_CODE']) . "', '" . str_replace("'", "''", $params[':AR_NAME']) . "', '" . str_replace("'", "''", $params[':SKU_CODE']) . "', '" . str_replace("'", "''", $params[':SKU_NAME']) . "', {$params[':TRD_QTY']}, {$params[':TRD_B_AMT']}, '" . str_replace("'", "''", $params[':SLMN_NAME']) . "', '{$params[':BRANCH']}');";
+            echo "[INSERT #" . $insert_count . "] " . $sql_insert_rec . "\r\n\r\n";
         }
     }
     $conn->commit();
