@@ -2,6 +2,8 @@
 
 ini_set('display_errors', 1);
 error_reporting(~0);
+set_time_limit(0);
+ini_set('memory_limit', '1024M');
 
 // Record Start Time
 $start_microtime = microtime(true);
@@ -51,19 +53,13 @@ echo "End Date:   " . $date_to . " (MySQL Lookup: " . $date_to_disp . ")\n\r";
 $query_year = " AND DOCINFO.DI_DATE BETWEEN '" . $date_start . "' AND '" . $date_to . "'";
 $sql_sqlsvr = $select_query_sale . $sql_cond_sale . $query_year . $sql_order_sale;
 
-echo $sql_sqlsvr . "\n\r";
-
 $stmt_sqlsvr = $conn_sqlsvr->prepare($sql_sqlsvr);
 $stmt_sqlsvr->execute();
 
 // Pre-load existing keys into memory hash map for fast lookup
 $existing_keys = [];
 try {
-    $stmt_exist = $conn->prepare("SELECT DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ FROM ims_product_sale_syy_ks WHERE DI_DATE BETWEEN :start_date AND :to_date");
-    $stmt_exist->execute([
-        ':start_date' => $date_start_disp,
-        ':to_date' => $date_to_disp
-    ]);
+    $stmt_exist = $conn->query("SELECT DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ FROM ims_product_sale_syy_ks");
     while ($row_ex = $stmt_exist->fetch(PDO::FETCH_ASSOC)) {
         $key = $row_ex['DI_KEY'] . '|' . $row_ex['DI_REF'] . '|' . $row_ex['DI_DATE'] . '|' . $row_ex['DT_DOCCODE'] . '|' . $row_ex['TRD_SEQ'];
         $existing_keys[$key] = true;
@@ -111,11 +107,6 @@ TRD_B_SELL, TRD_B_VAT, TRD_B_AMT, WL_CODE, WH_CODE, ARCD_NAME, BRANCH, PGROUP
 :TRD_B_SELL, :TRD_B_VAT, :TRD_B_AMT, :WL_CODE, :WH_CODE, :ARCD_NAME, :BRANCH, :PGROUP
 )";
 $stmt_insert = $conn->prepare($sql_insert);
-
-echo "--------------------------------------------------------\n\r";
-echo "MySQL UPDATE SQL Template:\n\r" . $sql_update . "\n\r\n\r";
-echo "MySQL INSERT SQL Template:\n\r" . $sql_insert . "\n\r";
-echo "--------------------------------------------------------\n\r";
 
 $update_count = 0;
 $insert_count = 0;
@@ -256,21 +247,27 @@ try {
         if ($is_update) {
             $stmt_update->execute($params);
             $update_count++;
-            $sql_update_rec = "UPDATE ims_product_sale_syy_ks SET AR_CODE='" . str_replace("'", "''", $params[':AR_CODE']) . "', AR_NAME='" . str_replace("'", "''", $params[':AR_NAME']) . "', SKU_CODE='" . str_replace("'", "''", $params[':SKU_CODE']) . "', SKU_NAME='" . str_replace("'", "''", $params[':SKU_NAME']) . "', TRD_QTY={$params[':TRD_QTY']}, TRD_B_AMT={$params[':TRD_B_AMT']} WHERE DI_KEY={$params[':DI_KEY']} AND DI_REF='{$params[':DI_REF']}' AND DI_DATE='{$params[':DI_DATE']}' AND DT_DOCCODE='{$params[':DT_DOCCODE']}' AND TRD_SEQ={$params[':TRD_SEQ']};";
-            echo "[UPDATE #" . $update_count . "] " . $sql_update_rec . "\r\n\r\n";
         } else {
             $stmt_insert->execute($params);
             $existing_keys[$key] = true;
             $insert_count++;
-            $sql_insert_rec = "INSERT INTO ims_product_sale_syy_ks (DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ, AR_CODE, AR_NAME, SKU_CODE, SKU_NAME, TRD_QTY, TRD_B_AMT, SLMN_NAME, BRANCH) VALUES ({$params[':DI_KEY']}, '{$params[':DI_REF']}', '{$params[':DI_DATE']}', '{$params[':DT_DOCCODE']}', {$params[':TRD_SEQ']}, '" . str_replace("'", "''", $params[':AR_CODE']) . "', '" . str_replace("'", "''", $params[':AR_NAME']) . "', '" . str_replace("'", "''", $params[':SKU_CODE']) . "', '" . str_replace("'", "''", $params[':SKU_NAME']) . "', {$params[':TRD_QTY']}, {$params[':TRD_B_AMT']}, '" . str_replace("'", "''", $params[':SLMN_NAME']) . "', '{$params[':BRANCH']}');";
-            echo "[INSERT #" . $insert_count . "] " . $sql_insert_rec . "\r\n\r\n";
+        }
+
+        if (($update_count + $insert_count) % 1000 === 0) {
+            $conn->commit();
+            $conn->beginTransaction();
         }
     }
-    $conn->commit();
+    if ($conn->inTransaction()) {
+        $conn->commit();
+    }
 } catch (Exception $e) {
-    $conn->rollBack();
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
     echo "Error: " . $e->getMessage() . "\n\r";
 }
+
 
 $end_microtime = microtime(true);
 $end_datetime = date("Y-m-d H:i:s");
