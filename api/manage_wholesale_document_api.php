@@ -134,7 +134,8 @@ $String_Sql = "SELECT DI_KEY, DI_REF, DI_DATE, DI_TIME_CHK, DI_ACTIVE, AR_NAME, 
                WHERE " . $sql_date_where
                . $sql_slmn_filter
                . $sql_iccat_filter
-               . " ORDER BY DI_KEY DESC";
+               . " ORDER BY DI_KEY DESC
+               LIMIT 10000";
 
 try {
     $query = $conn->prepare($String_Sql);

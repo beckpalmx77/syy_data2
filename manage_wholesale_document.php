@@ -323,6 +323,7 @@ if (strlen($_SESSION['alogin']) == "") {
             dataTableInstance = $('#TableRecordList').DataTable({
                 processing: true,
                 serverSide: false,
+                deferRender: true,
                 ajax: {
                     url: 'api/manage_wholesale_document_api.php',
                     type: 'POST',
