@@ -149,6 +149,11 @@ $String_Sql = "SELECT DI_KEY, DI_REF, DI_DATE, DI_TIME_CHK, DI_ACTIVE, AR_NAME, 
                . " ORDER BY DI_KEY DESC
                LIMIT 10000";
 
+$myfile = fopen("ks_api_log.txt", "w") or die("Unable to open file!");
+fwrite($myfile, $String_Sql);
+fclose($myfile);
+
+
 try {
     $query = $conn->prepare($String_Sql);
     $query->execute();

@@ -5,9 +5,6 @@ include_once('config/connect_db.php');
 if (strlen($_SESSION['alogin']) == "") {
     header("Location: index.php");
 } else {
-    $menu_title = isset($_GET['m']) ? htmlspecialchars(urldecode($_GET['m']), ENT_QUOTES, 'UTF-8') : 'รายงาน';
-    $sub_title = isset($_GET['s']) ? htmlspecialchars(urldecode($_GET['s']), ENT_QUOTES, 'UTF-8') : 'แสดงรายการขายส่ง (Document Line Items)';
-
     // Fetch Active Salesmen from MySQL ims_product_sale_syy_ks (Cached in Session)
     if (!isset($_SESSION['salesmen_list_cache']) || empty($_SESSION['salesmen_list_cache'])) {
         try {
@@ -44,13 +41,8 @@ if (strlen($_SESSION['alogin']) == "") {
 
     <!DOCTYPE html>
     <html lang="th">
-
     <head>
         <link href="js/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="vendor/datatables/v11/jquery.dataTables.min.css"/>
-        <link rel="stylesheet" href="vendor/datatables/v11/buttons.dataTables.min.css"/>
-        <link rel="stylesheet" href="css/datatables-bootstrap5.css"/>
-
         <style>
             .select2-container--default .select2-selection--multiple {
                 border-color: #d1d3e2;
@@ -75,6 +67,19 @@ if (strlen($_SESSION['alogin']) == "") {
                 background-color: #e74a3b;
                 color: #fff;
             }
+            .icon-input-btn {
+                display: inline-block;
+                position: relative;
+            }
+            .icon-input-btn input[type="submit"] {
+                padding-left: 2em;
+            }
+            .icon-input-btn .fa {
+                display: inline-block;
+                position: absolute;
+                left: 0.65em;
+                top: 30%;
+            }
         </style>
     </head>
 
@@ -89,15 +94,15 @@ if (strlen($_SESSION['alogin']) == "") {
                 <!-- Container Fluid-->
                 <div class="container-fluid" id="container-wrapper">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800"><?php echo $sub_title; ?></h1>
+                        <h1 class="h3 mb-0 text-gray-800"><?php echo urldecode($_GET['s'] ?? 'แสดงรายการขายส่ง (Document Line Items)'); ?></h1>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="<?php echo $_SESSION['dashboard_page']; ?>">Home</a></li>
-                            <li class="breadcrumb-item"><?php echo $menu_title; ?></li>
-                            <li class="breadcrumb-item active" aria-current="page"><?php echo $sub_title; ?></li>
+                            <li class="breadcrumb-item"><?php echo urldecode($_GET['m'] ?? 'รายงาน'); ?></li>
+                            <li class="breadcrumb-item active" aria-current="page"><?php echo urldecode($_GET['s'] ?? 'แสดงรายการขายส่ง (Document Line Items)'); ?></li>
                         </ol>
                     </div>
 
-                    <!-- Filter Control Panel Card (Template from manage-menu-main.php) -->
+                    <!-- Filter Control Panel Card (Matching manage-unit.php Interface Style) -->
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="card mb-12">
@@ -166,7 +171,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         <div id="exp_iccat_container"></div>
                     </form>
 
-                    <!-- Data Table Section Card (Template from manage-menu-main.php) -->
+                    <!-- Data Table Section Card (Matching manage-unit.php Interface Style) -->
                     <div class="row mt-4">
                         <div class="col-lg-12">
                             <div class="card mb-12">
@@ -199,7 +204,7 @@ if (strlen($_SESSION['alogin']) == "") {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <!-- Data injected by DataTables AJAX -->
+                                                    <!-- Data injected by DataTables AJAX from model/manage_wholesale_document_process.php -->
                                                 </tbody>
                                                 <tfoot class="font-weight-bold">
                                                     <tr>
@@ -216,6 +221,51 @@ if (strlen($_SESSION['alogin']) == "") {
                                         </div>
                                         <div id="result"></div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Record Detail Modal (Matching manage-unit.php Record Modal Pattern) -->
+                    <div class="modal fade" id="recordModal">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">รายละเอียดเอกสารขายส่ง</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="recordForm">
+                                        <div class="form-group">
+                                            <label for="modal_di_ref" class="control-label font-weight-bold">เลขที่เอกสาร (DI_REF)</label>
+                                            <input type="text" class="form-control" id="modal_di_ref" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modal_ar_name" class="control-label font-weight-bold">ชื่อลูกค้า (AR_NAME)</label>
+                                            <input type="text" class="form-control" id="modal_ar_name" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modal_sku_name" class="control-label font-weight-bold">ชื่อสินค้า (SKU_NAME)</label>
+                                            <input type="text" class="form-control" id="modal_sku_name" readonly>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-4">
+                                                <label for="modal_trd_qty" class="control-label font-weight-bold">จำนวนขาย</label>
+                                                <input type="text" class="form-control text-right" id="modal_trd_qty" readonly>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label for="modal_trd_u_prc" class="control-label font-weight-bold">ราคา/หน่วย</label>
+                                                <input type="text" class="form-control text-right" id="modal_trd_u_prc" readonly>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label for="modal_trd_b_amt" class="control-label font-weight-bold">จำนวนเงินรวม</label>
+                                                <input type="text" class="form-control text-right font-weight-bold" id="modal_trd_b_amt" readonly>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close <i class="fa fa-times"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -239,6 +289,7 @@ if (strlen($_SESSION['alogin']) == "") {
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <!-- Scripts (Matching manage-unit.php Vendor Dependencies) -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -250,9 +301,11 @@ if (strlen($_SESSION['alogin']) == "") {
     <script src="vendor/date-picker-1.9/locales/bootstrap-datepicker.th.min.js"></script>
     <link href="vendor/date-picker-1.9/css/bootstrap-datepicker.css" rel="stylesheet"/>
 
-    <!-- DataTables v11 (Same as manage-menu-main.php) -->
+    <!-- DataTables v11 (Same as manage-unit.php) -->
     <script src="vendor/datatables/v11/bootbox.min.js"></script>
     <script src="vendor/datatables/v11/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="vendor/datatables/v11/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="vendor/datatables/v11/buttons.dataTables.min.css"/>
 
     <script src="js/myadmin.min.js"></script>
     <script src="js/MyFrameWork/framework_util.js"></script>
@@ -262,7 +315,14 @@ if (strlen($_SESSION['alogin']) == "") {
         let dataTableInstance = null;
 
         $(document).ready(function () {
-            // Initialize Select2 dropdowns (default = ไม่เลือก)
+            // Icon button alignment helper matching manage-unit.php
+            $(".icon-input-btn").each(function () {
+                let btnFont = $(this).find(".btn").css("font-size");
+                let btnColor = $(this).find(".btn").css("color");
+                $(this).find(".fa").css({'font-size': btnFont, 'color': btnColor});
+            });
+
+            // Initialize Select2 dropdowns
             $('.select2').select2({
                 placeholder: "--- ไม่เลือก = ดึงทั้งหมด ---",
                 allowClear: true,
@@ -291,7 +351,7 @@ if (strlen($_SESSION['alogin']) == "") {
                 autoclose: true
             });
 
-            // Initialize DataTable
+            // Initialize DataTable calling backend model/manage_wholesale_document_process.php
             initDataTable();
 
             // Form Search Submit
@@ -324,32 +384,45 @@ if (strlen($_SESSION['alogin']) == "") {
         });
 
         function initDataTable() {
+            let formData = {
+                action: "GET_WHOLESALE_DOCUMENT"
+            };
+
             dataTableInstance = $('#TableRecordList').DataTable({
+                lengthMenu: [[10, 25, 50, 100, 500], [10, 25, 50, 100, 500]],
+                language: {
+                    search: 'ค้นหา',
+                    lengthMenu: 'แสดง _MENU_ รายการ',
+                    info: 'หน้าที่ _PAGE_ จาก _PAGES_',
+                    infoEmpty: 'ไม่มีข้อมูล',
+                    zeroRecords: "ไม่มีข้อมูลตามเงื่อนไข",
+                    infoFiltered: '(กรองข้อมูลจากทั้งหมด _MAX_ รายการ)',
+                    paginate: {
+                        previous: 'ก่อนหน้า',
+                        last: 'สุดท้าย',
+                        next: 'ต่อไป'
+                    }
+                },
                 processing: true,
-                serverSide: false,
-                deferRender: true,
+                serverSide: true,
+                serverMethod: 'post',
                 ajax: {
-                    url: 'api/manage_wholesale_document_api.php',
-                    type: 'POST',
-                    contentType: 'application/json',
+                    url: 'model/manage_wholesale_document_process.php',
                     data: function (d) {
-                        return JSON.stringify({
-                            doc_date_start: $('#doc_date_start').val(),
-                            doc_date_to: $('#doc_date_to').val(),
-                            slmn_name: $('#slmn_name').val() || null,
-                            iccat_code: $('#iccat_code').val() || null
-                        });
+                        d.action = "GET_WHOLESALE_DOCUMENT";
+                        d.doc_date_start = $('#doc_date_start').val();
+                        d.doc_date_to = $('#doc_date_to').val();
+                        d.slmn_name = $('#slmn_name').val() || null;
+                        d.iccat_code = $('#iccat_code').val() || null;
                     },
                     dataSrc: function (json) {
-                        if (json.status === 'success') {
-                            const dataList = json.data || [];
-                            $('#totalRecordsBadge').text(numberWithCommas(dataList.length) + ' รายการ');
+                        if (json && json.aaData) {
+                            const dataList = json.aaData || [];
+                            $('#totalRecordsBadge').text(numberWithCommas(json.iTotalDisplayRecords || dataList.length) + ' รายการ');
                             updateFooterTotals(dataList);
                             return dataList;
-                        } else {
-                            alert('API Error: ' + (json.message || 'ไม่สามารถดึงข้อมูลได้'));
-                            return [];
                         }
+                        return [];
                     }
                 },
                 columns: [
@@ -449,23 +522,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         }
                     }
                 ],
-                order: [],
-                pageLength: 25,
-                lengthMenu: [[10, 25, 50, 100, 500, -1], [10, 25, 50, 100, 500, "ทั้งหมด"]],
-                language: {
-                    search: "ค้นหาในตาราง:",
-                    lengthMenu: "แสดง _MENU_ รายการ/หน้า",
-                    zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
-                    info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                    infoEmpty: "แสดง 0 ถึง 0 จาก 0 รายการ",
-                    infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
-                    paginate: {
-                        first: "หน้าแรก",
-                        last: "หน้าสุดท้าย",
-                        next: "ถัดไป",
-                        previous: "ก่อนหน้า"
-                    }
-                }
+                order: [[1, 'desc']]
             });
         }
 
