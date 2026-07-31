@@ -40,75 +40,74 @@ include('config/lang.php');
         $results = $query->fetchAll(PDO::FETCH_OBJ);
 
         if ($query->rowCount() > 0) {
-            $mains_by_id = [];
-            $stmt_mm = $conn->query("SELECT * FROM menu_main ORDER BY main_menu_id");
-            if ($stmt_mm) {
-                while ($m = $stmt_mm->fetch(PDO::FETCH_OBJ)) {
-                    $mains_by_id[$m->main_menu_id] = $m;
-                }
-            }
-
-            $subs_by_key = [];
-            $stmt_ms = $conn->query("SELECT * FROM menu_sub ORDER BY main_menu_id, sub_menu_id");
-            if ($stmt_ms) {
-                while ($s = $stmt_ms->fetch(PDO::FETCH_OBJ)) {
-                    $subs_by_key[$s->main_menu_id . '_' . $s->sub_menu_id] = $s;
-                }
-            }
-
             foreach ($results as $result) {
                 $main_menu_ids = (explode(",", $result->main_menu));
                 $sub_menus_ids = (explode(",", $result->sub_menu));
 
                 foreach ($main_menu_ids as $main_menu_id) {
-                    $result_main = $mains_by_id[$main_menu_id] ?? null;
-                    if (!$result_main) continue;
 
-                    $main_menu = $_SESSION['lang'] == "th" ? $result_main->label : $result_main->label_en;
-                    ?>
+                    $sql_main_menu = "SELECT * FROM menu_main where main_menu_id = '" . $main_menu_id . "' order by main_menu_id ";
+                    $query_main_menu = $conn->prepare($sql_main_menu);
+                    $query_main_menu->execute();
+                    $result_mains = $query_main_menu->fetchAll(PDO::FETCH_OBJ);
 
-                    <li class="nav-item">
+                    foreach ($result_mains as $result_main) {
 
-                        <a class="nav-link collapsed" href="<?php echo $result_main->link ?>" data-toggle="collapse"
-                           data-target="<?php echo $result_main->data_target ?>"
-                           aria-expanded="true"
-                           aria-controls="<?php echo $result_main->aria_controls ?>">
-                            <?php echo "<i class='$result_main->icon'></i>" ?>
-                            <span><?php echo $main_menu; ?></span>
-                        </a>
+                        $main_menu = $_SESSION['lang'] == "th" ? $result_main->label : $result_main->label_en;
 
-                        <div id="<?php echo $result_main->aria_controls ?>" class="collapse"
-                             aria-labelledby="headingBootstrap"
-                             data-parent="#accordionSidebar">
-                            <div class="bg-white py-2 collapse-inner rounded">
+                        ?>
 
-                                <?php
-                                foreach ($sub_menus_ids as $sub_menus_id) {
-                                    $result_sub = $subs_by_key[$main_menu_id . '_' . $sub_menus_id] ?? null;
-                                    if (!$result_sub) continue;
+                        <li class="nav-item">
 
-                                    $sub_menu = $_SESSION['lang'] == "th" ? $result_sub->label : $result_sub->label_en;
-                                    $target_attr = '';
-                                    if (!empty($result_sub->link_target) && $result_sub->link_target !== '_self') {
-                                        $target_val = trim($result_sub->link_target);
-                                        if ($target_val === 'blank' || $target_val === '_blank') {
-                                            $target_val = '_blank';
-                                        }
-                                        $target_attr = ' target="' . htmlspecialchars($target_val) . '"';
-                                    }
-                                    ?>
-                                    <a class="collapse-item"
-                                       href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"<?php echo $target_attr; ?>>
-                                        <?php echo "<i class='$result_sub->icon'></i>" ?>
-                                        <span><?php echo $sub_menu; ?></span>
-                                    </a>
-                                <?php } ?>
+                            <a class="nav-link collapsed" href="<?php echo $result_main->link ?>" data-toggle="collapse"
+                               data-target="<?php echo $result_main->data_target ?>"
+                               aria-expanded="true"
+                               aria-controls="<?php echo $result_main->aria_controls ?>">
+                                <?php echo "<i class='$result_main->icon'></i>" ?>
+                                <span><?php echo $main_menu; ?></span>
+                            </a>
+
+                            <div id="<?php echo $result_main->aria_controls ?>" class="collapse"
+                                 aria-labelledby="headingBootstrap"
+                                 data-parent="#accordionSidebar">
+                                <div class="bg-white py-2 collapse-inner rounded">
+                                    <!--h6 class="collapse-header"><?php echo $main_menu; ?></h6-->
+
+                                    <?php
+
+                                    foreach ($sub_menus_ids as $sub_menus_id) {
+
+                                        $sql_sub_menu = "SELECT * FROM menu_sub where main_menu_id = '" . $main_menu_id . "' and  sub_menu_id = '" . $sub_menus_id . "'"
+                                            . " order by main_menu_id,sub_menu_id  ";
+                                        $query_sub_menu = $conn->prepare($sql_sub_menu);
+                                        $query_sub_menu->execute();
+                                        $result_subs = $query_sub_menu->fetchAll(PDO::FETCH_OBJ);
+
+                                        foreach ($result_subs as $result_sub) {
+
+                                            $sub_menu = $_SESSION['lang'] == "th" ? $result_sub->label : $result_sub->label_en;
+                                            $target_attr = '';
+                                            if (!empty($result_sub->link_target) && $result_sub->link_target !== '_self') {
+                                                $target_val = trim($result_sub->link_target);
+                                                if ($target_val === 'blank' || $target_val === '_blank') {
+                                                    $target_val = '_blank';
+                                                }
+                                                $target_attr = ' target="' . htmlspecialchars($target_val) . '"';
+                                            }
+                                            ?>
+                                            <a class="collapse-item"
+                                               href="<?php echo $result_sub->link . '?m=' . urlencode($main_menu) . '&s=' . urlencode($sub_menu) ?>"<?php echo $target_attr; ?>>
+                                                <?php echo "<i class='$result_sub->icon'></i>" ?>
+                                                <span><?php echo $sub_menu; ?></span>
+                                            </a>
+                                        <?php }
+                                    } ?>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                <?php
+                        </li>
+                    <?php
+                    }
                 }
-            }
             }
         }
     }?>
