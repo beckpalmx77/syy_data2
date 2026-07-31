@@ -25,13 +25,13 @@ if (strlen($_SESSION['alogin']) == "") {
                 <!-- Container Fluid-->
                 <div class="container-fluid" id="container-wrapper">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h4 mb-0 text-gray-800"><?php echo urldecode($_GET['s'] ?? 'แสดงรายการขายส่ง (Document Line Items)') ?></h1>
+                        <h1 class="h4 mb-0 text-gray-800"><?php echo urldecode($_GET['s']) ?></h1>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="<?php echo $_SESSION['dashboard_page'] ?>">Home</a>
                             </li>
-                            <li class="breadcrumb-item"><?php echo urldecode($_GET['m'] ?? 'รายงาน') ?></li>
+                            <li class="breadcrumb-item"><?php echo urldecode($_GET['m']) ?></li>
                             <li class="breadcrumb-item active"
-                                aria-current="page"><?php echo urldecode($_GET['s'] ?? 'แสดงรายการขายส่ง (Document Line Items)') ?></li>
+                                aria-current="page"><?php echo urldecode($_GET['s']) ?></li>
                         </ol>
                     </div>
 
@@ -43,12 +43,12 @@ if (strlen($_SESSION['alogin']) == "") {
                                 <div class="card-body">
                                     <section class="container-fluid">
                                         <form id="export_data" method="post"
-                                              action="export_process/export_data_wholesale.php"
+                                              action="export_process/export_process_data_product_sale_sac.php"
                                               enctype="multipart/form-data">
                                             <div class="col-md-12 col-md-offset-2"
                                                  style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                                 <label for="name_t"
-                                                       class="control-label"><b>ข้อมูล <?php echo urldecode($_GET['s'] ?? 'แสดงรายการขายส่ง (Document Line Items)') ?></b></label>
+                                                       class="control-label"><b>ข้อมูล <?php echo urldecode($_GET['s']) ?></b></label>
 
                                                 <button type="button" name="btnRefresh" id="btnRefresh"
                                                         class="btn btn-success btn-xs" onclick="ReloadDataTable();">
@@ -336,6 +336,9 @@ if (strlen($_SESSION['alogin']) == "") {
     <link rel="stylesheet" href="vendor/datatables/v11/jquery.dataTables.min.css"/>
     <link rel="stylesheet" href="vendor/datatables/v11/buttons.dataTables.min.css"/>
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script src="vendor/date-picker-1.9/js/bootstrap-datepicker.js"></script>
     <script src="vendor/date-picker-1.9/locales/bootstrap-datepicker.th.min.js"></script>
     <link href="vendor/date-picker-1.9/css/bootstrap-datepicker.css" rel="stylesheet"/>
@@ -361,6 +364,19 @@ if (strlen($_SESSION['alogin']) == "") {
             height: calc(1.5em + 0.75rem + 2px);
         }
 
+        .select2-container .select2-selection--single {
+            height: calc(1.5em + 0.75rem + 2px) !important;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: calc(1.5em + 0.75rem + 2px) !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.5em + 0.75rem + 2px) !important;
+        }
+
         #TableRecordList th, #TableRecordList td {
             white-space: nowrap;
         }
@@ -381,8 +397,6 @@ if (strlen($_SESSION['alogin']) == "") {
             let today = new Date();
             let doc_date = getDay2Digits(today) + "-" + getMonth2Digits(today) + "-" + today.getFullYear();
             $('#DI_DATE').val(doc_date);
-            $('#doc_date_start').val(doc_date);
-            $('#doc_date_to').val(doc_date);
         });
     </script>
 
@@ -414,7 +428,7 @@ if (strlen($_SESSION['alogin']) == "") {
     <script>
         let dataRecords;
         $(document).ready(function () {
-            let formData = {action: "GET_WHOLESALE_DOCUMENT"};
+            let formData = {action: "GET_DATA_SALE_SAC"};
             dataRecords = $('#TableRecordList').DataTable({
                 'lengthMenu': [[5, 10, 20, 50, 100], [5, 10, 20, 50, 100]],
                 'language': {
@@ -437,7 +451,7 @@ if (strlen($_SESSION['alogin']) == "") {
                 'scrollX': true,
                 'serverMethod': 'post',
                 'ajax': {
-                    'url': 'model/manage_wholesale_document_process.php',
+                    'url': 'model/manage_product_sale_ks_process.php',
                     'data': formData
                 },
                 'columns': [
@@ -468,7 +482,7 @@ if (strlen($_SESSION['alogin']) == "") {
                 $('#save').attr('disabled', 'disabled');
                 let formData = $(this).serialize();
                 $.ajax({
-                    url: 'model/manage_wholesale_document_process.php',
+                    url: 'model/manage_product_sale_ks_process.php',
                     method: "POST",
                     data: formData,
                     success: function (data) {
@@ -501,7 +515,7 @@ if (strlen($_SESSION['alogin']) == "") {
             let formData = {action: "GET_DATA", id: id};
             $.ajax({
                 type: "POST",
-                url: 'model/manage_wholesale_document_process.php',
+                url: 'model/manage_product_sale_ks_process.php',
                 dataType: "json",
                 data: formData,
                 success: function (response) {
@@ -544,6 +558,7 @@ if (strlen($_SESSION['alogin']) == "") {
                         $('#TRD_B_VAT').val(TRD_B_VAT);
                         $('#BRANCH').val(BRANCH);
 
+                        // Make form inputs readonly and hide save button for Info mode
                         $('#recordForm input').prop('readonly', true);
                         $('#save').hide();
 
@@ -568,7 +583,7 @@ if (strlen($_SESSION['alogin']) == "") {
             let formData = {action: "GET_DATA", id: id};
             $.ajax({
                 type: "POST",
-                url: 'model/manage_wholesale_document_process.php',
+                url: 'model/manage_product_sale_ks_process.php',
                 dataType: "json",
                 data: formData,
                 success: function (response) {
