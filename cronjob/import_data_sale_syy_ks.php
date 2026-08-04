@@ -34,9 +34,10 @@ $str_group2 = array_flip(array("402-J02","401-J01","401-KV01","401-WIL01","401-W
 $str_group3 = array_flip(array("999-01","999-02","999-03","999-04","999-05","999-06","999-07","999-08","999-09","999-10","999-11","999-12","999-13","999-14","999-15","999-16","999-17","999-18","999-19","999-20","999-21","999-22","999-23","SY02-00140"));
 $str_group4 = array_flip(array("999-26","999-28","A502-ALL03"));
 
-//$date_start_raw = isset($argv[2]) ? trim($argv[2]) : '2026/07/01';
+//$date_start_raw = isset($argv[2]) ? trim($argv[2]) : '2026/01/01';
 $date_start_raw = isset($argv[1]) ? trim($argv[1]) : date("Y/m/d", strtotime("yesterday"));
 $date_to_raw = isset($argv[2]) ? trim($argv[2]) : date("Y/m/d");
+//$date_to_raw = isset($argv[2]) ? trim($argv[2]) : '2026/01/10';
 
 $date_start = str_replace('-', '/', $date_start_raw);
 $date_to = str_replace('-', '/', $date_to_raw);
@@ -60,9 +61,9 @@ $stmt_sqlsvr->execute();
 // Pre-load existing keys into memory hash map for fast lookup
 $existing_keys = [];
 try {
-    $stmt_exist = $conn->query("SELECT DI_KEY, DI_REF, DI_DATE, DT_DOCCODE, TRD_SEQ FROM ims_product_sale_syy_ks");
+    $stmt_exist = $conn->query("SELECT DI_REF, DI_DATE, TRD_SEQ FROM ims_product_sale_syy_ks");
     while ($row_ex = $stmt_exist->fetch(PDO::FETCH_ASSOC)) {
-        $key = $row_ex['DI_KEY'] . '|' . $row_ex['DI_REF'] . '|' . $row_ex['DI_DATE'] . '|' . $row_ex['DT_DOCCODE'] . '|' . $row_ex['TRD_SEQ'];
+        $key = trim($row_ex['DI_REF']) . '|' . trim($row_ex['DI_DATE']) . '|' . trim($row_ex['TRD_SEQ']);
         $existing_keys[$key] = true;
     }
 } catch (Exception $e) {
@@ -70,7 +71,7 @@ try {
 }
 
 $sql_update = "UPDATE ims_product_sale_syy_ks SET 
-DI_TIME_CHK=:DI_TIME_CHK, DI_MONTH=:DI_MONTH, DI_MONTH_NAME=:DI_MONTH_NAME, DI_YEAR=:DI_YEAR, DI_ACTIVE=:DI_ACTIVE, DT_PROPERTIES=:DT_PROPERTIES,
+DI_KEY=:DI_KEY, DT_DOCCODE=:DT_DOCCODE, DI_TIME_CHK=:DI_TIME_CHK, DI_MONTH=:DI_MONTH, DI_MONTH_NAME=:DI_MONTH_NAME, DI_YEAR=:DI_YEAR, DI_ACTIVE=:DI_ACTIVE, DT_PROPERTIES=:DT_PROPERTIES,
 AR_CODE=:AR_CODE, AR_NAME=:AR_NAME, AROE_B_AMT=:AROE_B_AMT, ARD_B_VAT=:ARD_B_VAT, ARD_B_SV=:ARD_B_SV, ARD_B_SNV=:ARD_B_SNV,
 ARD_TDSC_KEYIN=:ARD_TDSC_KEYIN, ARD_TDSC_KEYINV=:ARD_TDSC_KEYINV, ARD_G_VAT=:ARD_G_VAT, ARD_G_SV=:ARD_G_SV, ARD_G_SNV=:ARD_G_SNV,
 ARD_G_KEYIN=:ARD_G_KEYIN, ARD_DUE_DA=:ARD_DUE_DA, ARD_CRNCYCODE=:ARD_CRNCYCODE, ARD_XCHG=:ARD_XCHG,
@@ -85,7 +86,7 @@ TRD_U_PRC=:TRD_U_PRC, TRD_U_VATIO=:TRD_U_VATIO, TRD_B_UPRC=:TRD_B_UPRC, TRD_DSC_
 TRD_G_AMT=:TRD_G_AMT, TRD_G_KEYIN=:TRD_G_KEYIN, TRD_G_SELL=:TRD_G_SELL, TRD_G_VAT=:TRD_G_VAT, TRD_TDSC_KEYINV=:TRD_TDSC_KEYINV,
 TRD_B_SELL=:TRD_B_SELL, TRD_B_VAT=:TRD_B_VAT, TRD_B_AMT=:TRD_B_AMT, WL_CODE=:WL_CODE, WH_CODE=:WH_CODE, ARCD_NAME=:ARCD_NAME,
 BRANCH=:BRANCH, PGROUP=:PGROUP
-WHERE DI_KEY = :DI_KEY AND DI_REF = :DI_REF AND DI_DATE = :DI_DATE AND DT_DOCCODE = :DT_DOCCODE AND TRD_SEQ = :TRD_SEQ";
+WHERE DI_REF = :DI_REF AND DI_DATE = :DI_DATE AND TRD_SEQ = :TRD_SEQ";
 $stmt_update = $conn->prepare($sql_update);
 
 $sql_insert = "INSERT INTO ims_product_sale_syy_ks (
@@ -155,7 +156,7 @@ try {
         $di_month = isset($result_sqlsvr["DI_MONTH"]) ? (int)$result_sqlsvr["DI_MONTH"] : 0;
         $month_name = isset($month_arr[$di_month]) ? $month_arr[$di_month] : "";
 
-        $key = $result_sqlsvr["DI_KEY"] . '|' . $result_sqlsvr["DI_REF"] . '|' . $result_sqlsvr["DI_DATE"] . '|' . $result_sqlsvr["DT_DOCCODE"] . '|' . $result_sqlsvr["TRD_SEQ"];
+        $key = trim($result_sqlsvr["DI_REF"] ?? '') . '|' . trim($result_sqlsvr["DI_DATE"] ?? '') . '|' . trim($result_sqlsvr["TRD_SEQ"] ?? '');
         $is_update = isset($existing_keys[$key]);
 
         $params = [
